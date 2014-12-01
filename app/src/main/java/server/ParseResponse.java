@@ -3,5 +3,6 @@ package server;
 /**
  * Created by Braden on 11/30/2014.
  */
-public class ParseResponse {
+public interface ParseResponse {
+    void ParseString(String str);
 }
