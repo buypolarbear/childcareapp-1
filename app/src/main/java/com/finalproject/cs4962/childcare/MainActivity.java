@@ -2,35 +2,54 @@ package com.finalproject.cs4962.childcare;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+
+import java.util.ArrayList;
 
 
 public class MainActivity extends Activity {
-
+    ///////////////////////////////////////////////////////////////////////////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ListView view = (ListView)findViewById(R.id.list);
+
     }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+    ///////////////////////////////////////////////////////////////////////////
+    protected ListView addItemsToListView(ListView view, ArrayList<String> items) {
+        final ArrayList<String> list = new ArrayList<String>();
+        for (int i = 0; i < items.size(); ++i) {
+            list.add(items.get(i));
         }
-        return super.onOptionsItemSelected(item);
+
+        //add the back button
+        list.add("Return to Main Menu");
+
+        final StableArrayAdapter adapter = new StableArrayAdapter(this,
+                android.R.layout.simple_list_item_1, list);
+
+        view.setAdapter(adapter);
+        view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
+                final String item = (String) parent.getItemAtPosition(position);
+                if (item.contains("Main Menu")) {
+                    LoadMainMenu();
+                    return;
+                }
+            }
+        });
+
+        return view;
     }
+    ///////////////////////////////////////////////////////////////////////////
+    protected void LoadMainMenu() {
+
+    }
+    ///////////////////////////////////////////////////////////////////////////
 }
