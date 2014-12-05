@@ -1,7 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:id="@+id/contactLayout"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+
+    <TextView
+        android:id="@+id/sitterName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sitter Name" />
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date" />
+        <TextView
+            android:id="@+id/startTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start time" />
+
+        <TextView
+            android:id="@+id/endTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="End time" />
+
+
+    <TextView
+        android:id="@+id/parentName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Parent name" />
+
+    <TextView
+        android:id="@+id/numKids"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Number of kids" />
 
 </LinearLayout>

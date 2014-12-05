@@ -4,7 +4,6 @@ import android.util.Log;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -21,7 +20,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
 /**
  * Created by Braden on 11/30/2014.
@@ -37,25 +35,19 @@ public class JSONParser {
 
     }
 
-    public static Object getJSONFromUrl(String _url, List<NameValuePair> params) {
+    public static Object getJSONFromUrl(String _url, JSONObject obj) {
 
         output = "";
         json = null;
         is = null;
 
         try {
-            if (params != null) {
+            if (obj != null) {
                 URL url = new URL(_url);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setDoOutput(true);
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("Content-Type", "application/json");
-
-                JSONObject obj = new JSONObject();
-
-                for (NameValuePair pair : params) {
-                    obj.put(pair.getName(), pair.getValue());
-                }
 
                 OutputStream os = conn.getOutputStream();
 
@@ -90,11 +82,6 @@ public class JSONParser {
                     HttpGet httpPost = new HttpGet(_url);
 
                     BasicHttpParams par = new BasicHttpParams();
-                    if (params != null) {
-                        for (NameValuePair pair : params)
-                            par.setParameter(pair.getName(), pair.getValue());
-                    }
-
                     httpPost.setParams(par);
                     HttpResponse httpResponse = httpClient.execute(httpPost);
                     HttpEntity httpEntity = httpResponse.getEntity();
@@ -105,7 +92,7 @@ public class JSONParser {
                 } catch (ClientProtocolException e) {
                     //      e.printStackTrace();
                 } catch (IOException e) {
-                    //    e.printStackTrace();
+                    e.printStackTrace();
                 }
 
                 try {
@@ -118,7 +105,6 @@ public class JSONParser {
                     }
                     is.close();
                     output = sb.toString();
-                    //Log.e("JSON", outPut);
                 } catch (Exception e) {
                     Log.e("Buffer Error", "Error converting result " + e.toString());
                 }
@@ -136,13 +122,13 @@ public class JSONParser {
                 )
 
         {
-            //e.printStackTrace();
+            e.printStackTrace();
         } catch (
                 Exception e
                 )
 
         {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
 
         try

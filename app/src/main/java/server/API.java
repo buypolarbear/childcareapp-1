@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
-import org.apache.http.NameValuePair;
+import org.json.JSONObject;
 
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import model.Address;
 import model.Availability;
-import model.Event;
+import model.Child;
 import model.Person;
 
 /**
@@ -21,15 +21,16 @@ import model.Person;
  */
 public class API {
 
-    private String baseUrl = "http://localhost:2786/api/"; //PORT MUST BE CONSTANT
+    private String baseUrl = "http://childcareappservice.azurewebsites.net/api/";
+   // private String baseUrl = "http://10.0.0.5:5142/api/"; //THIS STRING IS FOR LOCAL TESTING
     private String peopleUrl = "people";
     private String personUrl = "people/{id}";
-    private String availabilityUrl = "availabilities/{id}";
+    private String availabilityUrl = "availabilities";
     private String eventsUrl = "event";
     private String eventUrl = "event/{id}";
     private String childrenUrl = "children";
     private String childUrl = "children/{id}";
-    private String addressUrl = "address/{id}";
+    private String addressUrl = "addresses";
 
     ///////////////////////////////////////////////////////////////////////////////
     public Person[] GetPeople() {
@@ -46,15 +47,76 @@ public class API {
         return people;
     }
     ///////////////////////////////////////////////////////////////////////////////
-    public Availability GetAvailabilityByPerson(int personid) {
-        Person temp = GetPerson(personid);
-        PerformQuery(baseUrl + availabilityUrl.replace("{id}", Integer.toString(personid)), null);
-        AvailabilityResponse res = new AvailabilityResponse();
-        res.ParseString(response.toString());
-        return res.availability;
+    /*public List<Integer> AddChildren(List<Child> children) {
+        List<Integer> childid = new ArrayList<Integer>();
+
+        if(children == null) return childid;
+
+        for(Child child : children) {
+            PerformQuery(baseUrl + childrenUrl, APIHelpers.ComposeChild(child)); //should block until finished
+        }
+
+        return childid;
+    }*/
+    ///////////////////////////////////////////////////////////////////////////////
+   /* public int AddAvailability(Availability availability) {
+        PerformQuery(baseUrl + availabilityUrl, APIHelpers.ComposeAvailability(availability)); //should block until finished
+        int i = APIHelpers.ParseNewResponseID(response);
+        response = null;
+        return i;
+    }*/
+    ///////////////////////////////////////////////////////////////////////////////
+    public void AddPerson(Person person, Address addr, List<Child> children, Availability availability) {
+
+        /*person.addressid = AddAddress(addr);
+        AddChildren(children);
+        AddAvailability(availability);*/
+
+
+        person.address = addr;
+        person.availability = availability;
+        person.children = children;
+        person.scheduledEvents = null;
+
+        try {
+            PerformQuery(baseUrl + peopleUrl, new JSONObject(new Gson().toJson(person))); //should block until finished
+        } catch(Exception e) { e.printStackTrace(); }
+
+        //int id = APIHelpers.ParseNewResponseID(response);
+        response = null;
     }
     ///////////////////////////////////////////////////////////////////////////////
-    public Address GetAddressByPerson(int personid){
+    public Address[] GetAddresses() {
+        PerformQuery(baseUrl + addressUrl, null);
+        Address[] arr = new Gson().fromJson(response.toString(), Address[].class);
+        response = null;
+        return arr;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    private int CompareAddresses(Address addr) {
+        Address[] arr = GetAddresses();
+        for(Address a : arr) {
+            if (a.Same(addr))
+                return a.idaddress;
+        }
+        return -1;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    /*public int AddAddress(Address addr) {
+        //check to make sure it's not already in there
+        int id = CompareAddresses(addr);
+        if(id != -1) return id;
+
+
+        PerformQuery(baseUrl + addressUrl, APIHelpers.ComposeAddress(addr));
+
+        //we need to return the new addressStr id
+        id = CompareAddresses(addr);
+        response = null;
+        return id;
+    }*/
+    ///////////////////////////////////////////////////////////////////////////////
+    /*public Address GetAddressByPerson(int personid){
         Person temp = GetPerson(personid);
         PerformQuery(baseUrl + addressUrl.replace("{id}", Integer.toString(personid)), null);
         Address addr = new Gson().fromJson(response.toString(), Address.class);
@@ -79,13 +141,13 @@ public class API {
     public List<Event> GetEventsByParent(int parentid){
         //not sure yet..
         return null;
-    }
+    }*/
     ///////////////////////////////////////////////////////////////////////////////
     Object response = null;
     ///////////////////////////////////////////////////////////////////////////////
     Lock lock = new ReentrantLock();
     ///////////////////////////////////////////////////////////////////////////////
-    private void PerformQuery(String url, List<NameValuePair> args) {
+    private void PerformQuery(String url, JSONObject args) {
 
         lock.lock();
         try {
@@ -117,8 +179,36 @@ public class API {
         }
     }
     ///////////////////////////////////////////////////////////////////////////////
+}
 
+//##################################################################################################################////
+class APIHelpers {
 
+    ///////////////////////////////////////////////////////////////////////////////
+    public static int ParseNewResponseID(Object response) {
+        String str = response.toString();
+        String sub = str.substring(str.indexOf("id"));
+        return Integer.parseInt(sub);
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    private static String ComposeTimes(int[] times) {
+        String ret = "";
+        for(int i : times) {
+            ret += i + ":";
+        }
+        return ret;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    private static int[] DecomposeTimes(String times) {
+        int[] ret = new int[7];
 
-
+        String[] vals = times.split(":");
+        int index = 0;
+        for(String str : vals) {
+            int val = Integer.parseInt(str);
+            ret[index++] = val;
+        }
+        return ret;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
 }

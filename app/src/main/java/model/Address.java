@@ -6,6 +6,13 @@ package model;
 public class Address {
 
     public int idaddress;
-    public String city, state, zip, address, address1;
+    public String city, state, zip, addressStr;
+
+    public boolean Same(Address addr) {
+        if(this.city.equals(addr.city) && this.state.equals(addr.state) && this.zip.equals(addr.zip) && this.addressStr.equals(addr.addressStr))
+            return true;
+
+        return false;
+    }
 
 }
