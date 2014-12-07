@@ -7,10 +7,12 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import java.text.DateFormat;
@@ -141,6 +143,7 @@ public class MainActivity extends Activity {
         PageFragment fragment = new PageFragment();
         Bundle args = new Bundle();
         args.putString("Page", mMenuItems[position]);
+        fragment.activity = this;
         fragment.setArguments(args, mMenuItems);
 
         // Insert the fragment by replacing any existing fragment
@@ -183,6 +186,22 @@ public class MainActivity extends Activity {
         // Handle your other action bar items...
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void LoadAddContactsListeners() {
+        ((Button)findViewById(R.id.contactsButton)).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return false;
+            }
+        });
+
+        ((Button)findViewById(R.id.customButton)).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return false;
+            }
+        });
     }
 }
 

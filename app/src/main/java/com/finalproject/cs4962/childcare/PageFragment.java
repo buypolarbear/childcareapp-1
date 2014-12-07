@@ -13,9 +13,15 @@ public class PageFragment extends Fragment {
 
     String[] menuItems;
     String selectedView;
+    MainActivity activity;
+
+
+
+
     public void setArguments(Bundle args, String[] menuItems) {
         this.menuItems = menuItems;
         this.selectedView = args.getString("Page");
+        this.activity = (MainActivity)args.get("Activity");
     }
 
     @Override
@@ -26,7 +32,10 @@ public class PageFragment extends Fragment {
         int layoutID = -1;
         if(selectedView.contains("Events")) layoutID = R.layout.event_view;
         else if(selectedView.contains("Friends")) layoutID = R.layout.friends_layout;
-        else if(selectedView.contains("Add Contact")) layoutID = R.layout.contact_view;
+        else if(selectedView.contains("Add Contact")) {
+            activity.LoadAddContactsListeners();
+            layoutID = R.layout.add_contact_layout;
+        }
         else if(selectedView.contains("Add Event")) layoutID = R.layout.add_event_view;
 
         return inflater.inflate(layoutID, container, false);
