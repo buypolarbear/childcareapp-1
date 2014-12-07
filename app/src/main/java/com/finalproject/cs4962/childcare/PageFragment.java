@@ -1,7 +1,34 @@
 package com.finalproject.cs4962.childcare;
 
+import android.app.Fragment;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
 /**
  * Created by Braden on 12/6/2014.
  */
-public class PageFragment {
+public class PageFragment extends Fragment {
+
+    String[] menuItems;
+    String selectedView;
+    public void setArguments(Bundle args, String[] menuItems) {
+        this.menuItems = menuItems;
+        this.selectedView = args.getString("Page");
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        //{ "Events", "Friends", "Add Contact", "Add Event" };
+        int layoutID = -1;
+        if(selectedView.contains("Events")) layoutID = R.layout.event_view;
+        else if(selectedView.contains("Friends")) layoutID = R.layout.friends_layout;
+        else if(selectedView.contains("Add Contact")) layoutID = R.layout.contact_view;
+        else if(selectedView.contains("Add Event")) layoutID = R.layout.add_event_view;
+
+        return inflater.inflate(layoutID, container, false);
+    }
 }
