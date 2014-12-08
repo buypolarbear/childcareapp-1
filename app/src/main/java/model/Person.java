@@ -7,7 +7,7 @@ import java.util.List;
  */
 public class Person {
 
-    int idperson;
+    public int idperson;
 
     public String firstname;
     public String lastname;

@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -14,6 +15,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import model.Address;
 import model.Availability;
 import model.Child;
+import model.Event;
+import model.Friend;
 import model.Person;
 
 /**
@@ -22,16 +25,27 @@ import model.Person;
 public class API {
 
     private String baseUrl = "http://childcareappservice.azurewebsites.net/api/";
-   // private String baseUrl = "http://10.0.0.5:5142/api/"; //THIS STRING IS FOR LOCAL TESTING
+    //private String baseUrl = "http://10.0.0.5:5142/api/"; //THIS STRING IS FOR LOCAL TESTING
     private String peopleUrl = "people";
     private String personUrl = "people/{id}";
-    private String availabilityUrl = "availabilities";
     private String eventsUrl = "event";
-    private String eventUrl = "event/{id}";
     private String childrenUrl = "children";
-    private String childUrl = "children/{id}";
     private String addressUrl = "addresses";
+    private String friendsUrl = "friends/";
 
+    ///////////////////////////////////////////////////////////////////////////////
+    public Person[] GetFriends(Person person) {
+        PerformQuery(baseUrl + friendsUrl, null); //should block until finished
+        Friend[] people = new Gson().fromJson(response.toString(), Friend[].class);
+        response = null;
+        ArrayList<Person> friends = new ArrayList<Person>();
+        for(Friend f : people) {
+            if(f.Person1 == person.idperson) {
+                friends.add(GetPerson(f.Person2));
+            }
+        }
+        return (Person[])friends.toArray();
+    }
     ///////////////////////////////////////////////////////////////////////////////
     public Person[] GetPeople() {
         PerformQuery(baseUrl + peopleUrl, null); //should block until finished
@@ -47,32 +61,7 @@ public class API {
         return people;
     }
     ///////////////////////////////////////////////////////////////////////////////
-    /*public List<Integer> AddChildren(List<Child> children) {
-        List<Integer> childid = new ArrayList<Integer>();
-
-        if(children == null) return childid;
-
-        for(Child child : children) {
-            PerformQuery(baseUrl + childrenUrl, APIHelpers.ComposeChild(child)); //should block until finished
-        }
-
-        return childid;
-    }*/
-    ///////////////////////////////////////////////////////////////////////////////
-   /* public int AddAvailability(Availability availability) {
-        PerformQuery(baseUrl + availabilityUrl, APIHelpers.ComposeAvailability(availability)); //should block until finished
-        int i = APIHelpers.ParseNewResponseID(response);
-        response = null;
-        return i;
-    }*/
-    ///////////////////////////////////////////////////////////////////////////////
     public void AddPerson(Person person, Address addr, List<Child> children, Availability availability) {
-
-        /*person.addressid = AddAddress(addr);
-        AddChildren(children);
-        AddAvailability(availability);*/
-
-
         person.address = addr;
         person.availability = availability;
         person.children = children;
@@ -82,7 +71,6 @@ public class API {
             PerformQuery(baseUrl + peopleUrl, new JSONObject(new Gson().toJson(person))); //should block until finished
         } catch(Exception e) { e.printStackTrace(); }
 
-        //int id = APIHelpers.ParseNewResponseID(response);
         response = null;
     }
     ///////////////////////////////////////////////////////////////////////////////
@@ -93,55 +81,53 @@ public class API {
         return arr;
     }
     ///////////////////////////////////////////////////////////////////////////////
-    private int CompareAddresses(Address addr) {
-        Address[] arr = GetAddresses();
-        for(Address a : arr) {
-            if (a.Same(addr))
-                return a.idaddress;
+    private Child[] GetChildren() {
+        PerformQuery(baseUrl + childrenUrl, null);
+        Child[] children = new Gson().fromJson(response.toString(), Child[].class);
+        response = null;
+        return children;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    public Child[] GetChildrenByParent(int parentid){
+        Child[] children = GetChildren();
+        List<Child> mChildren = new ArrayList<Child>();
+        for(Child c : children) {
+            if(c.parentid == parentid)
+                mChildren.add(c);
         }
-        return -1;
+        return (Child[])mChildren.toArray();
     }
     ///////////////////////////////////////////////////////////////////////////////
-    /*public int AddAddress(Address addr) {
-        //check to make sure it's not already in there
-        int id = CompareAddresses(addr);
-        if(id != -1) return id;
-
-
-        PerformQuery(baseUrl + addressUrl, APIHelpers.ComposeAddress(addr));
-
-        //we need to return the new addressStr id
-        id = CompareAddresses(addr);
-        response = null;
-        return id;
-    }*/
-    ///////////////////////////////////////////////////////////////////////////////
-    /*public Address GetAddressByPerson(int personid){
-        Person temp = GetPerson(personid);
-        PerformQuery(baseUrl + addressUrl.replace("{id}", Integer.toString(personid)), null);
-        Address addr = new Gson().fromJson(response.toString(), Address.class);
-        response = null;
-        return addr;
-    }
-    ///////////////////////////////////////////////////////////////////////////////
-    public Person GetChildByParent(int parentid){
-        PerformQuery(baseUrl + childUrl.replace("{id}", Integer.toString(parentid)), null);
-        Person addr = new Gson().fromJson(response.toString(), Person.class);
-        response = null;
-        return addr;
-    }
-    ///////////////////////////////////////////////////////////////////////////////
-    public Event GetEventByID(int eventid){
-        PerformQuery(baseUrl + eventUrl.replace("{id}", Integer.toString(eventid)), null);
-        Event event = new Gson().fromJson(response.toString(), Event.class);
+    private Event[] GetEvents(){
+        PerformQuery(baseUrl + eventsUrl, null);
+        Event[] event = new Gson().fromJson(response.toString(), Event[].class);
         response = null;
         return event;
     }
     ///////////////////////////////////////////////////////////////////////////////
     public List<Event> GetEventsByParent(int parentid){
-        //not sure yet..
-        return null;
-    }*/
+
+        //grab all the events are sort based on teh parentid
+        List<Event> mEvents = new ArrayList<Event>();
+        Event[] events = GetEvents();
+        for(Event e : events) {
+            if(e.parentid == parentid)
+                mEvents.add(e);
+        }
+        return mEvents;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    public List<Event> GetEventsBySitter(int sitterid){
+
+        //grab all the events are sort based on teh sitterid
+        List<Event> mEvents = new ArrayList<Event>();
+        Event[] events = GetEvents();
+        for(Event e : events) {
+            if(e.sitterid == sitterid)
+                mEvents.add(e);
+        }
+        return mEvents;
+    }
     ///////////////////////////////////////////////////////////////////////////////
     Object response = null;
     ///////////////////////////////////////////////////////////////////////////////
