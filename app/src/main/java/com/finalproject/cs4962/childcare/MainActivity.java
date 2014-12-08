@@ -10,17 +10,17 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.FileWriter;
+
+import model.Availability;
 import model.Person;
 import server.API;
 
@@ -30,16 +30,45 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
     API api = new API();
     DrawerLayout mDrawerLayout;
     ListView mDrawerList;
-    String[] mMenuItems = new String[] { "Events", "Friends", "Add Contact", "Add Event" };
+    String[] mMenuItems = new String[] { "Events", "Friends", "Add Contact", "Add Event", "Profile" };
     String mTitle;
     private ActionBarDrawerToggle mDrawerToggle;
     private AddContactButtonListener addContactListener;
     private AvailabilityButtonListener setAvailabilityListener;
-
+    public boolean InitialSetup = true;
+    File file;
     ///////////////////////////////////////////////////////////////////////////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        file = new File(getFilesDir().getAbsolutePath() + "/childcarestartup.txt");
+        //file.delete(); UNCOMMENT TO TEST STARTUP SCREEN
+
+        SetupMainView();
+
+        if(!file.exists()) {
+            StartupView();
+        } else {
+            InitialSetup = false;
+        }
+
+
+    }
+    ///////////////////////////////////////////////////////////////////////////
+    private void StartupView() {
+        setContentView(R.layout.initial_startup);
+        ((Button)findViewById(R.id.beginStartup)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setContentView(R.layout.activity_main);
+                StartCustomContactFragment();
+            }
+        });
+    }
+    ///////////////////////////////////////////////////////////////////////////
+    protected void SetupMainView() {
         setContentView(R.layout.activity_main);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -82,52 +111,6 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
         addContactListener = new AddContactButtonListener(this);
         setAvailabilityListener = new AvailabilityButtonListener(this);
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-    public ArrayList<ContactCardRowData> GetScheduledEvents() {
-
-        ArrayList<ContactCardRowData> data = new ArrayList<ContactCardRowData>();
-        ContactCardRowData item = new ContactCardRowData();
-        item.date = DateFormat.getDateInstance().format(new Date());
-        item.startTime = "Now";
-        item.endTime = "Never";
-        item.parentname = "KARISSA!";
-        item.sittername = "BRADEN!";
-        item.numKids = "1";
-
-        data.add(item);
-
-        item = new ContactCardRowData();
-        item.date = DateFormat.getDateInstance().format(new Date());
-        item.startTime = "Now";
-        item.endTime = "Never";
-        item.parentname = "KARISSA!";
-        item.sittername = "BRADEN!";
-        item.numKids = "1";
-
-        data.add(item);
-        return data;
-    }
-    ///////////////////////////////////////////////////////////////////////////
-    protected ListView addItemsToListView(ListView listview, List<ViewGroup> views) {
-
-        final ArrayAdapter<ViewGroup> adapter = new ArrayAdapter<ViewGroup>(this, 0);
-
-        listview.setAdapter(adapter);
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
-                final String item = (String) parent.getItemAtPosition(position);
-                if (item.contains("Main Menu")) {
-                    LoadMainMenu();
-                    return;
-                }
-            }
-        });
-
-        return listview;
-    }
     ///////////////////////////////////////////////////////////////////////////
     public void LoadDetailedEventView(View view) {
         //TODO;
@@ -148,12 +131,10 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
 
     }
 
-    Person addedPerson = new Person();
     public void SetupManualContactView(View view) {
 
         final MainActivity _activity = this;
         ((Button)view.findViewById(R.id.addContactButton)).setOnClickListener(addContactListener);
-        //((Button)view.findViewById(R.id.setAvailabilityButton)).setOnClickListener(new AvailabilityButtonListener(this));
     }
 
 
@@ -243,13 +224,40 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    ContactManualFragment fragment = new ContactManualFragment();
-                    fragment._activity = _activity;
-                    _activity.getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                    StartCustomContactFragment();
                 }
                 return true;
             }
         });
+    }
+    public void LoadAvailabilityHandlers(View view) {
+        ((Button)view.findViewById(R.id.setAvailabilityButton)).setOnClickListener(setAvailabilityListener);
+    }
+    protected void StartCustomContactFragment() {
+        ContactManualFragment fragment = new ContactManualFragment();
+        fragment._activity = this;
+        getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+    }
+
+    public void SaveInitialStartup() {
+        Availability availability = setAvailabilityListener.availability;
+        Person user = addContactListener.addedPerson;
+
+        //save it to the file
+        Save(user, availability);
+    }
+
+    private void Save(Person user, Availability availability) {
+        if(file.exists()) return;
+        try {
+            file.createNewFile();
+
+            FileWriter writer = new FileWriter(file);
+            writer.write(new Gson().toJson(user));
+            writer.write(new Gson().toJson(availability));
+            writer.close();
+        } catch(Exception e) { e.printStackTrace(); }
+
     }
 }
 

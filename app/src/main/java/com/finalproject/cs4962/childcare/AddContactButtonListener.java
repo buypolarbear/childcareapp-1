@@ -18,6 +18,7 @@ public class AddContactButtonListener implements View.OnClickListener {
     }
     @Override
     public void onClick(View view) {
+
         view = (View)view.getParent();
         String firstname = ((EditText) view.findViewById(R.id.firstname)).getText().toString();
         String lastname = ((EditText) view.findViewById(R.id.lastname)).getText().toString();
@@ -37,6 +38,7 @@ public class AddContactButtonListener implements View.OnClickListener {
         addedPerson.address = addr;
 
         AvailabilityFragment fragment = new AvailabilityFragment();
+        fragment._activity = _activity;
         _activity.getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 }

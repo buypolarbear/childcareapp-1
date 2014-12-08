@@ -6,7 +6,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Please set the preferred days:"/>
+            android:gravity="center"
+            android:text="Please set the preferred days to watch others' children:"/>
         <CheckBox
             android:id="@+id/mondayCheck"
             android:layout_width="wrap_content"

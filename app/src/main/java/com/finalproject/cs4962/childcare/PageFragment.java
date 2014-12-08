@@ -37,6 +37,7 @@ public class PageFragment extends Fragment {
             return inflated;
         }
         else if(selectedView.contains("Add Event")) layoutID = R.layout.add_event_view;
+        else if(selectedView.contains("Profile")) layoutID = R.layout.profile_view;
 
         return inflater.inflate(layoutID, container, false);
     }
