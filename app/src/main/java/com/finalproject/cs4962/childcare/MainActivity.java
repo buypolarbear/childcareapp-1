@@ -3,6 +3,7 @@ package com.finalproject.cs4962.childcare;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -20,10 +21,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import model.Person;
 import server.API;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ContactsFragment.OnContactsInteractionListener {
     ///////////////////////////////////////////////////////////////////////////
     API api = new API();
     DrawerLayout mDrawerLayout;
@@ -31,6 +33,9 @@ public class MainActivity extends Activity {
     String[] mMenuItems = new String[] { "Events", "Friends", "Add Contact", "Add Event" };
     String mTitle;
     private ActionBarDrawerToggle mDrawerToggle;
+    private AddContactButtonListener addContactListener;
+    private AvailabilityButtonListener setAvailabilityListener;
+
     ///////////////////////////////////////////////////////////////////////////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +78,11 @@ public class MainActivity extends Activity {
         /*ListView list = (ListView)findViewById(R.id.listView);
         ContactCardArrayAdapter dataAdapter = new ContactCardArrayAdapter(this, R.id.sitterName, GetScheduledEvents(), new ContactCardClicked(this), this);
         list.setAdapter(dataAdapter);*/
+
+        addContactListener = new AddContactButtonListener(this);
+        setAvailabilityListener = new AvailabilityButtonListener(this);
     }
+
     ///////////////////////////////////////////////////////////////////////////
     public ArrayList<ContactCardRowData> GetScheduledEvents() {
 
@@ -122,12 +131,32 @@ public class MainActivity extends Activity {
     ///////////////////////////////////////////////////////////////////////////
     public void LoadDetailedEventView(View view) {
         //TODO;
-        setContentView(R.layout.detailed_event_view);
+        //setContentView(R.layout.detailed_event_view);
     }
     ///////////////////////////////////////////////////////////////////////////
     protected void LoadMainMenu() {
 
     }
+
+    @Override
+    public void onContactSelected(Uri contactUri) {
+
+    }
+
+    @Override
+    public void onSelectionCleared() {
+
+    }
+
+    Person addedPerson = new Person();
+    public void SetupManualContactView(View view) {
+
+        final MainActivity _activity = this;
+        ((Button)view.findViewById(R.id.addContactButton)).setOnClickListener(addContactListener);
+        //((Button)view.findViewById(R.id.setAvailabilityButton)).setOnClickListener(new AvailabilityButtonListener(this));
+    }
+
+
     ///////////////////////////////////////////////////////////////////////////
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -188,18 +217,37 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void LoadAddContactsListeners() {
-        ((Button)findViewById(R.id.contactsButton)).setOnTouchListener(new View.OnTouchListener() {
+    public void LoadAddContactsListeners(View view) {
+        final MainActivity _activity = this;
+        // Gets the ListView from the View list of the parent activity
+        // Sets the adapter for the ListView
+
+        ((Button)view.findViewById(R.id.contactsButton)).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                return false;
+
+                //findViewById(R.id.)
+                //mContactsList = (ListView) view.findViewById(R.id.list);
+                //mContactsList.setAdapter(mCursorAdapter);
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    ContactsFragment fragment = new ContactsFragment();
+
+                    _activity.getFragmentManager().beginTransaction()
+                            .replace(R.id.content_frame, fragment).commit();
+                }
+                return true;
             }
         });
 
-        ((Button)findViewById(R.id.customButton)).setOnTouchListener(new View.OnTouchListener() {
+        ((Button)view.findViewById(R.id.customButton)).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                return false;
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    ContactManualFragment fragment = new ContactManualFragment();
+                    fragment._activity = _activity;
+                    _activity.getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                }
+                return true;
             }
         });
     }
