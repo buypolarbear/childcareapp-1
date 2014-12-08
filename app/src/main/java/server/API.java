@@ -34,6 +34,37 @@ public class API {
     private String friendsUrl = "friends/";
 
     ///////////////////////////////////////////////////////////////////////////////
+    public void AddEvent(Event event) {
+        try {
+            PerformQuery(baseUrl + friendsUrl, new JSONObject(new Gson().toJson(event))); //should block until finished
+        } catch(Exception e ) { e.printStackTrace(); }
+
+        response = null;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    public void AddChildToParent(Person child, Person parent) {
+        try {
+            child.availability = parent.availability;
+            child.address = parent.address;
+
+            AddPerson(child, child.address, null, child.availability); //the person must be in before we add the child
+
+            PerformQuery(baseUrl + childrenUrl, new JSONObject(new Gson().toJson(child))); //add the child
+        } catch(Exception e) { e.printStackTrace(); }
+
+        response = null;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    public void AddFriend(Person person1, Person person2) {
+        Friend f = new Friend();
+        f.Person1 = person1.idperson;
+        f.Person2 = person2.idperson;
+        try {
+            PerformQuery(baseUrl + friendsUrl, new JSONObject(new Gson().toJson(f)));
+        } catch(Exception e) { e.printStackTrace(); }
+        response = null;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
     public Person[] GetFriends(Person person) {
         PerformQuery(baseUrl + friendsUrl, null); //should block until finished
         Friend[] people = new Gson().fromJson(response.toString(), Friend[].class);

@@ -10,7 +10,4 @@ public class Child {
     public int childid;
     public String notes;
     public int age;
-
-    public Person parent;
-    public Person child;
 }
