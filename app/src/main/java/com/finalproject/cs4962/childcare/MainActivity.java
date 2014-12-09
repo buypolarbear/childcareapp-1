@@ -13,13 +13,18 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 
+import model.Address;
 import model.Availability;
 import model.Person;
 import server.API;
@@ -36,15 +41,16 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
     private AddContactButtonListener addContactListener;
     private AvailabilityButtonListener setAvailabilityListener;
     public boolean InitialSetup = true;
-    File file;
+    File file, file1;
     ///////////////////////////////////////////////////////////////////////////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
 
-        file = new File(getFilesDir().getAbsolutePath() + "/childcarestartup.txt");
-        //file.delete(); UNCOMMENT TO TEST STARTUP SCREEN
+        file = new File(getFilesDir().getAbsolutePath() + "/user.txt");
+        file1 = new File(getFilesDir().getAbsolutePath() + "/availability.txt");
+        //file.delete(); //UNCOMMENT TO TEST STARTUP SCREEN
 
         SetupMainView();
 
@@ -248,16 +254,91 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
     }
 
     private void Save(Person user, Availability availability) {
-        if(file.exists()) return;
+        if(file.exists()) file.delete();
+        if(file1.exists()) file1.delete();
         try {
             file.createNewFile();
+            file1.createNewFile();
 
             FileWriter writer = new FileWriter(file);
+            FileWriter writer1 = new FileWriter(file1);
             writer.write(new Gson().toJson(user));
-            writer.write(new Gson().toJson(availability));
+            writer1.write(new Gson().toJson(availability));
             writer.close();
+            writer1.close();
         } catch(Exception e) { e.printStackTrace(); }
 
+    }
+    private String ReadUserFile(File file) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String val = "";
+            while (reader.ready()) val += reader.readLine();
+
+            return val;
+        } catch(Exception e) {e.printStackTrace();}
+
+        return null;
+    }
+    private Person GetUser() {
+
+        try {
+            return new Gson().fromJson(ReadUserFile(file), Person.class);
+        } catch(Exception e) { e.printStackTrace(); }
+        return null;
+    }
+    private Availability GetUserAvailability() {
+
+        try {
+            return new Gson().fromJson(ReadUserFile(file1), Availability.class);
+        } catch(Exception e) { e.printStackTrace(); }
+        return null;
+    }
+
+    public void SetProfileView(View view) {
+        final MainActivity activity = this;
+        Person user = GetUser();
+        ((EditText)view.findViewById(R.id.profile_firstname)).setText(user.firstname);
+        ((EditText)view.findViewById(R.id.profile_lastname)).setText(user.lastname);
+        ((EditText)view.findViewById(R.id.profile_phonenumber)).setText(user.phonenumber);
+        ((EditText)view.findViewById(R.id.profile_address)).setText(user.address.addressStr);
+        ((EditText)view.findViewById(R.id.profile_city)).setText(user.address.city);
+        ((EditText)view.findViewById(R.id.profile_state)).setText(user.address.state);
+        ((EditText)view.findViewById(R.id.profile_zip)).setText(user.address.zip);
+        ((Button)view.findViewById(R.id.profile_save)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view = (View)view.getParent().getParent();
+                String firstname = ((EditText) view.findViewById(R.id.profile_firstname)).getText().toString();
+                String lastname = ((EditText) view.findViewById(R.id.profile_lastname)).getText().toString();
+                String phonenumber = ((EditText) view.findViewById(R.id.profile_phonenumber)).getText().toString();
+                String address = ((EditText) view.findViewById(R.id.profile_address)).getText().toString();
+                String city = ((EditText) view.findViewById(R.id.profile_city)).getText().toString();
+                String state = ((EditText) view.findViewById(R.id.profile_state)).getText().toString();
+                String zipcode = ((EditText) view.findViewById(R.id.profile_zip)).getText().toString();
+
+                Person addedPerson = new Person();
+                addedPerson.firstname = firstname;
+                addedPerson.lastname = lastname;
+                addedPerson.phonenumber = phonenumber;
+                Address addr = new Address();
+                addr.addressStr = address;
+                addr.city = city;
+                addr.state = state;
+                addr.zip = zipcode;
+                addedPerson.address = addr;
+
+                activity.Save(addedPerson, activity.GetUserAvailability());
+
+                Toast.makeText(activity, "User information saved!", Toast.LENGTH_LONG).show();
+            }
+        });
+        ((Button)view.findViewById(R.id.profile_cancel)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                activity.selectItem(0); //return to home
+            }
+        });
     }
 }
 

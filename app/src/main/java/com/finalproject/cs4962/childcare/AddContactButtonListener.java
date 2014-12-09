@@ -22,6 +22,7 @@ public class AddContactButtonListener implements View.OnClickListener {
         view = (View)view.getParent();
         String firstname = ((EditText) view.findViewById(R.id.firstname)).getText().toString();
         String lastname = ((EditText) view.findViewById(R.id.lastname)).getText().toString();
+        String phonenumber = ((EditText) view.findViewById(R.id.phonenumber)).getText().toString();
         String address = ((EditText) view.findViewById(R.id.address)).getText().toString();
         String city = ((EditText) view.findViewById(R.id.city)).getText().toString();
         String state = ((EditText) view.findViewById(R.id.state)).getText().toString();
@@ -30,6 +31,7 @@ public class AddContactButtonListener implements View.OnClickListener {
         addedPerson = new Person();
         addedPerson.firstname = firstname;
         addedPerson.lastname = lastname;
+        addedPerson.phonenumber = phonenumber;
         Address addr = new Address();
         addr.addressStr = address;
         addr.city = city;
