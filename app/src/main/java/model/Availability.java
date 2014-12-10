@@ -6,7 +6,6 @@ package model;
 public class Availability {
 
     //times are stored in a 24 hours format, 0 - 24 hours
-    public int personid = -1;
     public String startTimes;
     public String endTimes;
    // public int[] startTimesInt = new int[7];

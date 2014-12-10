@@ -5,7 +5,6 @@ package model;
  */
 public class Address {
 
-    public int idaddress;
     public String city, state, zip, addressStr;
 
     public boolean Same(Address addr) {

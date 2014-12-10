@@ -3,8 +3,11 @@ package server;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -31,6 +34,7 @@ public class API {
     private String eventsUrl = "event";
     private String childrenUrl = "children";
     private String addressUrl = "addresses";
+    private String addressidUrl = "addresses/{id}";
     private String friendsUrl = "friends/";
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -56,6 +60,14 @@ public class API {
     }
     ///////////////////////////////////////////////////////////////////////////////
     public void AddFriend(Person person1, Person person2) {
+        Person[] people = GetPeople();
+        for(Person p : people) {
+            if(p.firstname.equals(person1.firstname) && p.lastname.equals(person1.lastname))
+                person1.idperson = p.idperson;
+            if(p.firstname.equals(person2.firstname) && p.lastname.equals(person2.lastname))
+                person2.idperson = p.idperson;
+
+        }
         Friend f = new Friend();
         f.Person1 = person1.idperson;
         f.Person2 = person2.idperson;
@@ -80,9 +92,47 @@ public class API {
     ///////////////////////////////////////////////////////////////////////////////
     public Person[] GetPeople() {
         PerformQuery(baseUrl + peopleUrl, null); //should block until finished
-        Person[] people = new Gson().fromJson(response.toString(), Person[].class);
+        List<Person> people = new ArrayList<Person>();
+        JSONArray arr = (JSONArray)response; //i know it's an array
+        GsonBuilder builder = new GsonBuilder();
+        builder.setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE);
+        Gson gson = builder.create();
+
+        for(int i = 0; i < arr.length(); i++) {
+            try {
+                Person p = new Person();
+                JSONObject obj = arr.getJSONObject(i);
+                p.firstname =  obj.getString("FirstName");
+                p.lastname =  obj.getString("LastName");
+                p.phonenumber = obj.getString("PhoneNumber");
+                p.idperson = obj.getInt("ID");
+
+                p.address = GetAddress(obj.getInt("AddressID"));
+
+                people.add(p);
+
+            } catch(Exception e) { e.printStackTrace(); }
+        }
         response = null;
-        return people;
+        Person[] arra = new Person[people.size()];
+        for(int i = 0; i < arra.length; i++) {
+            arra[i] = people.get(i);
+        }
+        return arra;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    public Address GetAddress(int id) {
+        PerformQuery(baseUrl + addressidUrl.replace("{id}", Integer.toString(id)), null); //should block until finished
+        Address addr = new Address();
+        JSONObject obj = (JSONObject) response;
+        try {
+            addr.addressStr = obj.getString("AddressStr");
+            addr.city = obj.getString("City");
+            addr.state = obj.getString("State");
+            addr.zip = obj.getString("Zip");
+        } catch(Exception e) { e.printStackTrace(); }
+        response = null;
+        return addr;
     }
     ///////////////////////////////////////////////////////////////////////////////
     public Person GetPerson(int id) {
@@ -179,9 +229,9 @@ public class API {
                 while (done == false) //should block
                     Thread.sleep(1000);
             } catch(Exception e) { Log.e("waiting", e.getMessage()); }
-
-            lock.unlock();
         }
+        done = false;
+        lock.unlock();
     }
     ///////////////////////////////////////////////////////////////////////////////
     boolean done = false;

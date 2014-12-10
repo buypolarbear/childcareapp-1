@@ -2,9 +2,12 @@ package com.finalproject.cs4962.childcare;
 
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
@@ -29,7 +32,6 @@ import model.Availability;
 import model.Person;
 import server.API;
 
-
 public class MainActivity extends Activity implements ContactsFragment.OnContactsInteractionListener {
     ///////////////////////////////////////////////////////////////////////////
     API api = new API();
@@ -47,7 +49,7 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        //
         file = new File(getFilesDir().getAbsolutePath() + "/user.txt");
         file1 = new File(getFilesDir().getAbsolutePath() + "/availability.txt");
         //file.delete(); //UNCOMMENT TO TEST STARTUP SCREEN
@@ -59,8 +61,6 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
         } else {
             InitialSetup = false;
         }
-
-
     }
     ///////////////////////////////////////////////////////////////////////////
     private void StartupView() {
@@ -123,8 +123,8 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
         //setContentView(R.layout.detailed_event_view);
     }
     ///////////////////////////////////////////////////////////////////////////
-    protected void LoadMainMenu() {
-
+    public void SetupManualContactView(View view) {
+        ((Button)view.findViewById(R.id.addContactButton)).setOnClickListener(addContactListener);
     }
 
     @Override
@@ -137,15 +137,7 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
 
     }
 
-    public void SetupManualContactView(View view) {
-
-        final MainActivity _activity = this;
-        ((Button)view.findViewById(R.id.addContactButton)).setOnClickListener(addContactListener);
-    }
-
-
     ///////////////////////////////////////////////////////////////////////////
-
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id) {
@@ -153,6 +145,7 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////
     /** Swaps fragments in the main content view */
     private void selectItem(int position) {
         // Create a new fragment and specify the planet to show based on position
@@ -174,24 +167,26 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
+    ///////////////////////////////////////////////////////////////////////////
     @Override
     public void setTitle(CharSequence title) {
         mTitle = (String)title;
         getActionBar().setTitle(mTitle);
     }
+    ///////////////////////////////////////////////////////////////////////////
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
         mDrawerToggle.syncState();
     }
-
+    ///////////////////////////////////////////////////////////////////////////
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
-
+    ///////////////////////////////////////////////////////////////////////////
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Pass the event to ActionBarDrawerToggle, if it returns
@@ -203,56 +198,118 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
 
         return super.onOptionsItemSelected(item);
     }
-
+    ///////////////////////////////////////////////////////////////////////////
+    private final int PICK_CONTACT = 1;
+    ///////////////////////////////////////////////////////////////////////////
     public void LoadAddContactsListeners(View view) {
         final MainActivity _activity = this;
         // Gets the ListView from the View list of the parent activity
         // Sets the adapter for the ListView
 
-        ((Button)view.findViewById(R.id.contactsButton)).setOnTouchListener(new View.OnTouchListener() {
+        ((Button)view.findViewById(R.id.contactsButton)).setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
+            public void onClick(View view) {
 
-                //findViewById(R.id.)
-                //mContactsList = (ListView) view.findViewById(R.id.list);
-                //mContactsList.setAdapter(mCursorAdapter);
-                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    ContactsFragment fragment = new ContactsFragment();
-
-                    _activity.getFragmentManager().beginTransaction()
-                            .replace(R.id.content_frame, fragment).commit();
-                }
-                return true;
+                Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                startActivityForResult(intent, PICK_CONTACT);
             }
         });
 
         ((Button)view.findViewById(R.id.customButton)).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
                     StartCustomContactFragment();
                 }
                 return true;
             }
         });
     }
+    ///////////////////////////////////////////////////////////////////////////
+    Person contactFromPhone;
+    ///////////////////////////////////////////////////////////////////////////
+    @Override
+    public void onActivityResult(int reqCode, int resultCode, Intent data){
+        super.onActivityResult(reqCode, resultCode, data);
+
+        switch(reqCode)
+        {
+            case (PICK_CONTACT):
+                if (resultCode == Activity.RESULT_OK)
+                {
+                    Uri contactData = data.getData();
+
+                    ContactHelper helper = new ContactHelper(getContentResolver(), contactData);
+                    String name = helper.retrieveContactName();
+                    String number = helper.retrieveContactNumber();
+
+                    contactFromPhone = new Person();
+                    contactFromPhone.firstname = name.split(" ")[0];
+                    contactFromPhone.lastname = name.split(" ")[1];
+                    contactFromPhone.phonenumber = number;
+                    Address addr = helper.retrieveContactAddress();
+                    contactFromPhone.address = addr;
+
+                    //switch to the availability
+                    AvailabilityFragment fragment = new AvailabilityFragment();
+                    fragment._activity = this;
+                    getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                }
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////
+    public void AvailabilitySetForImportedContact() {
+        final MainActivity _activity = this;
+        final ProgressDialog progress = new ProgressDialog(this);
+        progress.setTitle("Loading");
+        progress.setMessage("Wait while we import your new friend!");
+        progress.show();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //grab the availability and the contactAddedPerson and save them to the api and the friends
+                Availability a = setAvailabilityListener.availability;
+                Person contact = _activity.contactFromPhone;
+
+                API api = new API();
+                api.AddPerson(contact, contact.address, null, a);
+                api.AddFriend(GetUser(), contact);
+                // To dismiss the dialog
+                progress.dismiss();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        selectItem(0);
+                        //Toast.makeText(_activity, "Finished!", Toast.LENGTH_LONG);
+                    }
+                });
+            }
+        }).start();
+
+    }
+    //////////////////////////////////////////////////////////////////////////
     public void LoadAvailabilityHandlers(View view) {
         ((Button)view.findViewById(R.id.setAvailabilityButton)).setOnClickListener(setAvailabilityListener);
     }
+    //////////////////////////////////////////////////////////////////////////
     protected void StartCustomContactFragment() {
         ContactManualFragment fragment = new ContactManualFragment();
         fragment._activity = this;
         getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
-
+    //////////////////////////////////////////////////////////////////////////
     public void SaveInitialStartup() {
         Availability availability = setAvailabilityListener.availability;
         Person user = addContactListener.addedPerson;
 
         //save it to the file
         Save(user, availability);
-    }
 
+        API api = new API();
+        api.AddPerson(user, user.address, null, availability);
+    }
+    //////////////////////////////////////////////////////////////////////////
     private void Save(Person user, Availability availability) {
         if(file.exists()) file.delete();
         if(file1.exists()) file1.delete();
@@ -269,6 +326,7 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
         } catch(Exception e) { e.printStackTrace(); }
 
     }
+    //////////////////////////////////////////////////////////////////////////
     private String ReadUserFile(File file) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -280,6 +338,7 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
 
         return null;
     }
+    //////////////////////////////////////////////////////////////////////////
     private Person GetUser() {
 
         try {
@@ -287,6 +346,7 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
         } catch(Exception e) { e.printStackTrace(); }
         return null;
     }
+    //////////////////////////////////////////////////////////////////////////
     private Availability GetUserAvailability() {
 
         try {
@@ -294,7 +354,7 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
         } catch(Exception e) { e.printStackTrace(); }
         return null;
     }
-
+    //////////////////////////////////////////////////////////////////////////
     public void SetProfileView(View view) {
         final MainActivity activity = this;
         Person user = GetUser();
@@ -340,5 +400,6 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
             }
         });
     }
+    //////////////////////////////////////////////////////////////////////////
 }
 

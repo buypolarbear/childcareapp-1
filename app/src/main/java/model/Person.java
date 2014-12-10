@@ -7,13 +7,12 @@ import java.util.List;
  */
 public class Person {
 
-    public int idperson;
 
+    public int idperson = -1;
     public String firstname;
     public String lastname;
     public String phonenumber;
 
-    public int addressid;
     public Address address;
 
     public Availability availability;
