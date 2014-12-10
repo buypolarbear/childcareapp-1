@@ -6,10 +6,10 @@ import android.view.View;
 /**
  * Created by Braden on 12/6/2014.
  */
-public class ContactCardClicked implements View.OnTouchListener {
+public class EventCardClicked implements View.OnTouchListener {
 
     public MainActivity activity;
-    public ContactCardClicked(MainActivity Activity) {
+    public EventCardClicked(MainActivity Activity) {
         this.activity = Activity;
     }
 

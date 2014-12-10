@@ -7,5 +7,8 @@
     <string name="open">Open</string>
     <string name="closed">Closed</string>
     <string name="alphabet">en</string>
+    <string name="name"><u><b>Name</b></u></string>
+    <string name="phoneNumber"><u><b>Phone Number</b></u></string>
+    <string name="address"><u><b>Address</b></u></string>
 
 </resources>

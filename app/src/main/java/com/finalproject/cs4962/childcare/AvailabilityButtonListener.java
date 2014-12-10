@@ -28,7 +28,7 @@ public class AvailabilityButtonListener implements View.OnClickListener {
             _activity.InitialSetup = false;
             //show some alert, "Congrats! You're ready to start using ChildCare!"
         } else {
-            _activity.AvailabilitySetForImportedContact();
+            _activity.AvailabilitySetForImportedContact(availability, _activity.contactFromPhone);
         }
     }
 

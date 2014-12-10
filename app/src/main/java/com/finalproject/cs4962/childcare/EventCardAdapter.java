@@ -14,28 +14,28 @@ import java.util.Random;
 /**
  * Created by Braden on 12/4/2014.
  */
-class ContactViewHolder {
+class EventViewHolder {
     TextView sitterName, dateTimes, parentName, numKids;
     ImageView contactPicture;
     ImageView arrow;
 }
 
-public class ContactCardArrayAdapter extends ArrayAdapter<ContactCardRowData> {
+public class EventCardAdapter extends ArrayAdapter<EventCardRowData> {
 
-    private ArrayList<ContactCardRowData> list;
+    private ArrayList<EventCardRowData> list;
     private MainActivity _activity;
     private View.OnTouchListener _handler;
     //this custom adapter receives an ArrayList of RowData objects.
     //RowData is my class that represents the data for a single row and could be anything.
-    public ContactCardArrayAdapter(Context context,
+    public EventCardAdapter(Context context,
                                    int textViewResourceId,
-                                   ArrayList<ContactCardRowData> rowDataList,
+                                   ArrayList<EventCardRowData> rowDataList,
                                    View.OnTouchListener handler,
                                    MainActivity activity)
     {
         //populate the local list with data.
         super(context, textViewResourceId, rowDataList);
-        this.list = new ArrayList<ContactCardRowData>();
+        this.list = new ArrayList<EventCardRowData>();
         this.list.addAll(rowDataList);
 
         this._activity = activity;
@@ -45,13 +45,13 @@ public class ContactCardArrayAdapter extends ArrayAdapter<ContactCardRowData> {
     public View getView(final int position, View convertView, ViewGroup parent)
     {
         //creating the ViewHolder we defined earlier.
-        ContactViewHolder holder = new ContactViewHolder();
+        EventViewHolder holder = new EventViewHolder();
 
         //creating LayoutInflator for inflating the row layout.
         LayoutInflater inflator = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         //inflating the row layout we defined earlier.
-        convertView = inflator.inflate(R.layout.contact_view, null);
+        convertView = inflator.inflate(R.layout.event_view, null);
         convertView.setOnTouchListener(this._handler);
 
         //setting the views into the ViewHolder.

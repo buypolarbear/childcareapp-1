@@ -26,13 +26,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
 
 import model.Address;
 import model.Availability;
 import model.Person;
 import server.API;
 
-public class MainActivity extends Activity implements ContactsFragment.OnContactsInteractionListener {
+public class MainActivity extends Activity {
     ///////////////////////////////////////////////////////////////////////////
     API api = new API();
     DrawerLayout mDrawerLayout;
@@ -49,7 +50,9 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //
+//        SetupMainView();
+
+
         file = new File(getFilesDir().getAbsolutePath() + "/user.txt");
         file1 = new File(getFilesDir().getAbsolutePath() + "/availability.txt");
         //file.delete(); //UNCOMMENT TO TEST STARTUP SCREEN
@@ -62,6 +65,8 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
             InitialSetup = false;
         }
     }
+    ///////////////////////////////////////////////////////////////////////////
+
     ///////////////////////////////////////////////////////////////////////////
     private void StartupView() {
         setContentView(R.layout.initial_startup);
@@ -125,16 +130,6 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
     ///////////////////////////////////////////////////////////////////////////
     public void SetupManualContactView(View view) {
         ((Button)view.findViewById(R.id.addContactButton)).setOnClickListener(addContactListener);
-    }
-
-    @Override
-    public void onContactSelected(Uri contactUri) {
-
-    }
-
-    @Override
-    public void onSelectionCleared() {
-
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -224,6 +219,12 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
                 return true;
             }
         });
+        ((Button)view.findViewById(R.id.fromServer)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SetContactRowData(); //this will push the fragment when it's done
+            }
+        });
     }
     ///////////////////////////////////////////////////////////////////////////
     Person contactFromPhone;
@@ -258,25 +259,24 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
         }
     }
     //////////////////////////////////////////////////////////////////////////
-    public void AvailabilitySetForImportedContact() {
+    public void AvailabilitySetForImportedContact(final Availability availability, final Person person) {
         final MainActivity _activity = this;
         final ProgressDialog progress = new ProgressDialog(this);
         progress.setTitle("Loading");
-        progress.setMessage("Wait while we import your new friend!");
+        progress.setMessage("Please wait while we import your new friend!");
         progress.show();
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 //grab the availability and the contactAddedPerson and save them to the api and the friends
-                Availability a = setAvailabilityListener.availability;
-                Person contact = _activity.contactFromPhone;
 
                 API api = new API();
-                api.AddPerson(contact, contact.address, null, a);
-                api.AddFriend(GetUser(), contact);
+                api.AddPerson(person, person.address, null, availability);
+                api.AddFriend(GetUser(), person);
                 // To dismiss the dialog
                 progress.dismiss();
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -401,5 +401,72 @@ public class MainActivity extends Activity implements ContactsFragment.OnContact
         });
     }
     //////////////////////////////////////////////////////////////////////////
+    public void StartAPIContactsLoad(ArrayList<ContactRowData> data) {
+
+        ContactFragment fragment = new ContactFragment();
+        fragment.activity = this;
+        fragment.data = data;
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    public void StartAvailabilityFragment() {
+        final MainActivity activity = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AvailabilityFragment fragment = new AvailabilityFragment();
+                fragment._activity = activity;
+                FragmentManager manager = getFragmentManager();
+                manager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+            }
+        });
+
+    }
+    //////////////////////////////////////////////////////////////////////////
+    private void SetContactRowData() {
+        final ArrayList<ContactRowData> data = new ArrayList<ContactRowData>();
+        final MainActivity activity = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final ProgressDialog progress = new ProgressDialog(activity);
+                progress.setTitle("Loading");
+                progress.setMessage("Please wait while we grab potential new friends!");
+                progress.show();
+
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //grab the availability and the contactAddedPerson and save them to the api and the friends
+
+                        API api = new API();
+                        Person[] people = api.GetPeople();
+
+                        for(Person p : people) {
+                            ContactRowData row = new ContactRowData();
+                            row.firstName = p.firstname;
+                            row.lastName = p.lastname;
+                            row.address = p.address.addressStr;
+                            row.city = p.address.city;
+                            row.state = p.address.state;
+                            row.zip = p.address.zip;
+                            row.phoneNumber = p.phonenumber;
+
+                            data.add(row);
+                        }
+                        // To dismiss the dialog
+                        progress.dismiss();
+
+                        activity.StartAPIContactsLoad(data);
+                    }
+                });
+
+                thread.start();
+            }
+        });
+    }
 }
 
