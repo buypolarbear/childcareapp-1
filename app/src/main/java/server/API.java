@@ -12,6 +12,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -36,7 +38,43 @@ public class API {
     private String addressUrl = "addresses";
     private String addressidUrl = "addresses/{id}";
     private String friendsUrl = "friends/";
+    private static API singleton = null;
+    private static boolean finishedFirstPeopleLoad = false;
+    ///////////////////////////////////////////////////////////////////////////////
+    public static API Get() {
+        if(singleton == null) {
+            singleton = new API();
+            return singleton;
+        }
 
+//if it's not the first grab make sure it's loaded at least once
+        try {
+            while (!finishedFirstPeopleLoad) Thread.sleep(1000);
+        } catch(Exception e) { e.printStackTrace(); }
+        API copy = null;
+        try { //thread safe singleton
+            singleton.lock.lock();
+            copy = (API)singleton;
+            singleton.lock.unlock();
+        } catch(Exception e) { e.printStackTrace(); }
+
+        return copy;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    private API() {
+        //really nothing except load the people
+        final API api = this;
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                peopleLock.lock();
+                GetPeople();
+                peopleLock.unlock();
+
+                finishedFirstPeopleLoad = true;
+            }
+        }, 0, 50000);
+    }
     ///////////////////////////////////////////////////////////////////////////////
     public void AddEvent(Event event) {
         try {
@@ -60,8 +98,10 @@ public class API {
     }
     ///////////////////////////////////////////////////////////////////////////////
     public void AddFriend(Person person1, Person person2) {
-        Person[] people = GetPeople();
-        for(Person p : people) {
+        if(GetPeopleCached() == null)
+            GetPeople();
+
+        for(Person p : GetPeopleCached()) {
             if(p.firstname.equals(person1.firstname) && p.lastname.equals(person1.lastname))
                 person1.idperson = p.idperson;
             if(p.firstname.equals(person2.firstname) && p.lastname.equals(person2.lastname))
@@ -83,14 +123,46 @@ public class API {
         response = null;
         ArrayList<Person> friends = new ArrayList<Person>();
         for(Friend f : people) {
-            if(f.Person1 == person.idperson) {
-                friends.add(GetPerson(f.Person2));
+            if(f.Person1 == person.idperson) { //this should speed things up quite a bit
+                friends.add(GetPersonFromSavedPeople(f.Person2));
+            } else if(f.Person2 == person.idperson) {
+                friends.add(GetPersonFromSavedPeople(f.Person1));
             }
         }
-        return (Person[])friends.toArray();
+        Person[] ret = new Person[friends.size()];
+        for(int i = 0; i < friends.size(); i++) {
+            ret[i] = friends.get(i);
+        }
+
+        return ret;
     }
     ///////////////////////////////////////////////////////////////////////////////
-    public Person[] GetPeople() {
+    private Person GetPersonFromSavedPeople(int id) {
+        if(GetPeopleCached() == null) GetPeople();
+
+        for(Person p : GetPeopleCached()) {
+            if(p.idperson == id) return p;
+        }
+
+        return null;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    private void SetPeopleCached(Person[] people) {
+        peopleLock.lock();
+        this.people = people;
+        peopleLock.unlock();
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    public Person[] GetPeopleCached() {
+
+        if(people == null) return null;
+        peopleLock.lock();
+        Person[] copy = people.clone();
+        peopleLock.unlock();
+        return copy;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    private Person[] GetPeople() {
         PerformQuery(baseUrl + peopleUrl, null); //should block until finished
         List<Person> people = new ArrayList<Person>();
         JSONArray arr = (JSONArray)response; //i know it's an array
@@ -118,6 +190,7 @@ public class API {
         for(int i = 0; i < arra.length; i++) {
             arra[i] = people.get(i);
         }
+        SetPeopleCached(arra);
         return arra;
     }
     ///////////////////////////////////////////////////////////////////////////////
@@ -133,6 +206,19 @@ public class API {
         } catch(Exception e) { e.printStackTrace(); }
         response = null;
         return addr;
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    Person[] people = null;
+    ///////////////////////////////////////////////////////////////////////////////
+    public int GetPersonID(Person person) {
+        if(GetPeopleCached() == null)
+            GetPeople();
+
+        for(Person p : GetPeopleCached()) {
+            if(p.firstname.equals(person.firstname) && p.lastname.equals(person.lastname) && p.phonenumber.equals(person.phonenumber))
+                return p.idperson;
+        }
+        return -1;
     }
     ///////////////////////////////////////////////////////////////////////////////
     public Person GetPerson(int id) {
@@ -213,6 +299,7 @@ public class API {
     Object response = null;
     ///////////////////////////////////////////////////////////////////////////////
     Lock lock = new ReentrantLock();
+    Lock peopleLock = new ReentrantLock();
     ///////////////////////////////////////////////////////////////////////////////
     private void PerformQuery(String url, JSONObject args) {
 

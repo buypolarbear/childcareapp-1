@@ -27,7 +27,10 @@ public class PageFragment extends Fragment {
         //{ "Events", "Friends", "Add Contact", "Add Event" };
         int layoutID = -1;
         if(selectedView.contains("Events")) layoutID = R.layout.event_view;
-        else if(selectedView.contains("Friends")) layoutID = R.layout.friends_layout;
+        else if(selectedView.contains("Friends")) {
+            activity.SetFriendsRowData();
+            layoutID = R.layout.friends_layout;
+        }
         else if(selectedView.contains("Add Contact")) {
 
             layoutID = R.layout.add_contact_layout;
@@ -43,7 +46,6 @@ public class PageFragment extends Fragment {
             activity.SetProfileView(inflated);
             return inflated;
         }
-
         return inflater.inflate(layoutID, container, false);
     }
 

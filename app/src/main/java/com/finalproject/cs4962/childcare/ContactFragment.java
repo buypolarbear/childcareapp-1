@@ -17,6 +17,7 @@ public class ContactFragment extends Fragment {
 
     public MainActivity activity;
     public ArrayList<ContactRowData> data;
+    public View.OnTouchListener handler;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -26,7 +27,7 @@ public class ContactFragment extends Fragment {
                 R.layout.contact_view,
                 data,
                 //GetSampleData(),
-                new ContactRowDataClicked(activity),
+                handler,
                 activity);
         //
 

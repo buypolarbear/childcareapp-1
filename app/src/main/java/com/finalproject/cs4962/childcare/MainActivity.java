@@ -34,8 +34,8 @@ import model.Person;
 import server.API;
 
 public class MainActivity extends Activity {
+
     ///////////////////////////////////////////////////////////////////////////
-    API api = new API();
     DrawerLayout mDrawerLayout;
     ListView mDrawerList;
     String[] mMenuItems = new String[] { "Events", "Friends", "Add Contact", "Add Event", "Profile" };
@@ -81,6 +81,9 @@ public class MainActivity extends Activity {
     ///////////////////////////////////////////////////////////////////////////
     protected void SetupMainView() {
         setContentView(R.layout.activity_main);
+
+        //first call the API so it can load
+        API.Get(); //we don't care about the response
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -271,7 +274,7 @@ public class MainActivity extends Activity {
             public void run() {
                 //grab the availability and the contactAddedPerson and save them to the api and the friends
 
-                API api = new API();
+                API api = API.Get();
                 api.AddPerson(person, person.address, null, availability);
                 api.AddFriend(GetUser(), person);
                 // To dismiss the dialog
@@ -306,7 +309,7 @@ public class MainActivity extends Activity {
         //save it to the file
         Save(user, availability);
 
-        API api = new API();
+        API api = API.Get();
         api.AddPerson(user, user.address, null, availability);
     }
     //////////////////////////////////////////////////////////////////////////
@@ -401,11 +404,12 @@ public class MainActivity extends Activity {
         });
     }
     //////////////////////////////////////////////////////////////////////////
-    public void StartAPIContactsLoad(ArrayList<ContactRowData> data) {
+    public void StartAPIContactsLoad(ArrayList<ContactRowData> data, View.OnTouchListener listener) {
 
         ContactFragment fragment = new ContactFragment();
         fragment.activity = this;
         fragment.data = data;
+        fragment.handler = listener;
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
                 .replace(R.id.content_frame, fragment)
@@ -442,8 +446,8 @@ public class MainActivity extends Activity {
                     public void run() {
                         //grab the availability and the contactAddedPerson and save them to the api and the friends
 
-                        API api = new API();
-                        Person[] people = api.GetPeople();
+                        API api = API.Get();
+                        Person[] people = api.GetPeopleCached();
 
                         for(Person p : people) {
                             ContactRowData row = new ContactRowData();
@@ -460,7 +464,56 @@ public class MainActivity extends Activity {
                         // To dismiss the dialog
                         progress.dismiss();
 
-                        activity.StartAPIContactsLoad(data);
+                        activity.StartAPIContactsLoad(data, new ContactRowDataClicked(activity));
+                    }
+                });
+
+                thread.start();
+            }
+        });
+    }
+    //////////////////////////////////////////////////////////////////////////
+    public void SetFriendsRowData() {
+        final ArrayList<ContactRowData> data = new ArrayList<ContactRowData>();
+        final MainActivity activity = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                final ProgressDialog progress = new ProgressDialog(activity);
+                progress.setTitle("Loading");
+                progress.setMessage("Please wait while we grab your friends!");
+                progress.show();
+
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //grab the availability and the contactAddedPerson and save them to the api and the friends
+
+                        API api = API.Get();
+                        Person person = GetUser();
+                        if(person.idperson == -1) {
+                            person.idperson = api.GetPersonID(person);
+                            Save(person, GetUserAvailability()); //prevent future loading
+                        }
+
+                        Person[] people = api.GetFriends(person);
+
+                        for(Person p : people) {
+                            ContactRowData row = new ContactRowData();
+                            row.firstName = p.firstname;
+                            row.lastName = p.lastname;
+                            row.address = p.address.addressStr;
+                            row.city = p.address.city;
+                            row.state = p.address.state;
+                            row.zip = p.address.zip;
+                            row.phoneNumber = p.phonenumber;
+
+                            data.add(row);
+                        }
+                        // To dismiss the dialog
+                        progress.dismiss();
+
+                        activity.StartAPIContactsLoad(data, new FriendOnTouchHandler());
                     }
                 });
 
