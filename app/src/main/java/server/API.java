@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -74,6 +75,18 @@ public class API {
                 finishedFirstPeopleLoad = true;
             }
         }, 0, 50000);
+    }
+    ///////////////////////////////////////////////////////////////////////////////
+    private void addPersonToCache(Person person) {
+        peopleLock.lock();
+        List<Person> list = new ArrayList<Person>(Arrays.asList(people));
+        list.add(person);
+        Person[] ret = new Person[list.size()];
+        for(int i = 0; i < list.size(); i++) {
+            ret[i] = list.get(i);
+        }
+        people = ret.clone();
+        peopleLock.unlock();
     }
     ///////////////////////////////////////////////////////////////////////////////
     public void AddEvent(Event event) {
@@ -233,6 +246,8 @@ public class API {
         person.availability = availability;
         person.children = children;
         person.scheduledEvents = null;
+
+
 
         try {
             PerformQuery(baseUrl + peopleUrl, new JSONObject(new Gson().toJson(person))); //should block until finished
