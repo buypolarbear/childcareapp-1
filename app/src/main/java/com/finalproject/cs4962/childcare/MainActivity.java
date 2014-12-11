@@ -198,6 +198,7 @@ public class MainActivity extends Activity {
     }
     ///////////////////////////////////////////////////////////////////////////
     private final int PICK_CONTACT = 1;
+    private final int CREATE_CONTACT = 2;
     ///////////////////////////////////////////////////////////////////////////
     public void LoadAddContactsListeners(View view) {
         final MainActivity _activity = this;
@@ -213,15 +214,28 @@ public class MainActivity extends Activity {
             }
         });
 
-        ((Button)view.findViewById(R.id.customButton)).setOnTouchListener(new View.OnTouchListener() {
+//        ((Button)view.findViewById(R.id.customButton)).setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View view, MotionEvent motionEvent) {
+//                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+//                    StartCustomContactFragment();
+//                }
+//                return true;
+//            }
+//        });
+
+        ((Button)view.findViewById(R.id.customButton)).setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    StartCustomContactFragment();
-                }
-                return true;
+            public void onClick(View view) {
+
+                Intent intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
+                //intent.putExtra(ContactsContract.Intents.EXTRA_FORCE_CREATE, true);
+                intent.putExtra("finishActivityOnSaveCompleted", true);
+                startActivityForResult(intent, CREATE_CONTACT);
+
             }
         });
+
         ((Button)view.findViewById(R.id.fromServer)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -242,17 +256,52 @@ public class MainActivity extends Activity {
                 if (resultCode == Activity.RESULT_OK)
                 {
                     Uri contactData = data.getData();
+                    //Toast.makeText(getApplicationContext(),"Hello: "+data.getData().toString(),Toast.LENGTH_LONG).show();
+                    ContactHelper helper = new ContactHelper(getContentResolver(), contactData);
+                    String name = helper.retrieveContactName();
+                    String number = helper.retrieveContactNumber();
+
+                    contactFromPhone = new Person();
+                    if(name != null) {
+                        contactFromPhone.firstname = (name.split(" ")[0] == null) ? "" : name.split(" ")[0];
+                        if(name.split(" ").length >1)
+                            contactFromPhone.lastname = (name.split(" ")[1] == null) ? "" : name.split(" ")[1];
+                    }
+                    contactFromPhone.phonenumber = number;
+                    if(helper.retrieveContactAddress() != null)
+                    {
+                        Address addr = helper.retrieveContactAddress();
+                        contactFromPhone.address = addr;
+                    }
+
+
+                    //switch to the availability
+                    AvailabilityFragment fragment = new AvailabilityFragment();
+                    fragment._activity = this;
+                    getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                }
+            case (CREATE_CONTACT):
+                if (resultCode == Activity.RESULT_OK)
+                {
+                    Uri contactData = data.getData();
 
                     ContactHelper helper = new ContactHelper(getContentResolver(), contactData);
                     String name = helper.retrieveContactName();
                     String number = helper.retrieveContactNumber();
 
                     contactFromPhone = new Person();
-                    contactFromPhone.firstname = name.split(" ")[0];
-                    contactFromPhone.lastname = name.split(" ")[1];
+                    if(name != null) {
+                        contactFromPhone.firstname = (name.split(" ")[0] == null) ? "" : name.split(" ")[0];
+                        if(name.split(" ").length >1)
+                            contactFromPhone.lastname = (name.split(" ")[1] == null) ? "" : name.split(" ")[1];
+                    }
                     contactFromPhone.phonenumber = number;
-                    Address addr = helper.retrieveContactAddress();
-                    contactFromPhone.address = addr;
+                    if(helper.retrieveContactAddress() != null)
+                    {
+                        Address addr = helper.retrieveContactAddress();
+                        contactFromPhone.address = addr;
+                    }
+
 
                     //switch to the availability
                     AvailabilityFragment fragment = new AvailabilityFragment();

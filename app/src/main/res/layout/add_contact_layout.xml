@@ -7,7 +7,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Select how you would like to add a new contact."/>
+        android:text="How would you like to add a new contact?"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
