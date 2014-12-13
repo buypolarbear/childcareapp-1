@@ -1,9 +1,11 @@
 package com.finalproject.cs4962.childcare;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,11 +29,18 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import model.Address;
 import model.Availability;
 import model.Person;
 import server.API;
+
+
+
+
 
 public class MainActivity extends Activity {
 
@@ -44,7 +53,14 @@ public class MainActivity extends Activity {
     private AddContactButtonListener addContactListener;
     private AvailabilityButtonListener setAvailabilityListener;
     public boolean InitialSetup = true;
-    File file, file1;
+    File file, file1, file2;
+
+    public static final String CONTACT_PREF = "MyContactFile";
+
+
+    final ArrayList<ContactRowData> Contact_Data = new ArrayList<ContactRowData>();
+
+
     ///////////////////////////////////////////////////////////////////////////
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +71,7 @@ public class MainActivity extends Activity {
 
         file = new File(getFilesDir().getAbsolutePath() + "/user.txt");
         file1 = new File(getFilesDir().getAbsolutePath() + "/availability.txt");
+        //file2 = new File(getFilesDir().getAbsolutePath() + "/friends_contacts.txt");
         //file.delete(); //UNCOMMENT TO TEST STARTUP SCREEN
 
         SetupMainView();
@@ -66,6 +83,48 @@ public class MainActivity extends Activity {
         }
     }
     ///////////////////////////////////////////////////////////////////////////
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences settings = getSharedPreferences(CONTACT_PREF, 0);
+
+        Set<String> set = settings.getStringSet("Contact_Data_Set",new HashSet<String>());
+
+        Contact_Data.clear();
+
+        for( Iterator<String> i = set.iterator(); i.hasNext();)
+        {
+            try {
+                Contact_Data.add(new Gson().fromJson(i.next(), ContactRowData.class));
+                //editor.putString("Contact_Data", new Gson().toJson(Contact_Data));
+               // Contact_Data = (ArrayList<ContactRowData>) new Gson().fromJson(settings.getString("Contact_Data", ""), ContactRowData.class);
+                // Contact_Data =  (ArrayList<ContactRowData>) ObjectSerializer.deserialize(prefs.getString(TASKS, ObjectSerializer.serialize(new ArrayList<task>())));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        saveContactsList();
+
+        return;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     private void StartupView() {
@@ -197,8 +256,8 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
     ///////////////////////////////////////////////////////////////////////////
-    private final int PICK_CONTACT = 1;
-    private final int CREATE_CONTACT = 2;
+    private final int ADD_CONTACT = 1;
+  //  private final int CREATE_CONTACT = 2;
     ///////////////////////////////////////////////////////////////////////////
     public void LoadAddContactsListeners(View view) {
         final MainActivity _activity = this;
@@ -210,7 +269,7 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
 
                 Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-                startActivityForResult(intent, PICK_CONTACT);
+                startActivityForResult(intent, ADD_CONTACT);
             }
         });
 
@@ -228,10 +287,15 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
 
+
+//                AlertDialog.Builder builder = new AlertDialog.Builder(_activity);
+//
+//                builder.setTitle("Pick one from Contacts or create a new one?");
+//                builder.create();
                 Intent intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
-                //intent.putExtra(ContactsContract.Intents.EXTRA_FORCE_CREATE, true);
+                intent.putExtra(ContactsContract.Intents.EXTRA_FORCE_CREATE, true);
                 intent.putExtra("finishActivityOnSaveCompleted", true);
-                startActivityForResult(intent, CREATE_CONTACT);
+                startActivityForResult(intent, ADD_CONTACT);
 
             }
         });
@@ -252,7 +316,7 @@ public class MainActivity extends Activity {
 
         switch(reqCode)
         {
-            case (PICK_CONTACT):
+            case (ADD_CONTACT):
                 if (resultCode == Activity.RESULT_OK)
                 {
                     Uri contactData = data.getData();
@@ -275,39 +339,30 @@ public class MainActivity extends Activity {
                     }
 
 
-                    //switch to the availability
-                    AvailabilityFragment fragment = new AvailabilityFragment();
-                    fragment._activity = this;
-                    getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
-                }
-            case (CREATE_CONTACT):
-                if (resultCode == Activity.RESULT_OK)
-                {
-                    Uri contactData = data.getData();
+                    ContactRowData row = new ContactRowData();
 
-                    ContactHelper helper = new ContactHelper(getContentResolver(), contactData);
-                    String name = helper.retrieveContactName();
-                    String number = helper.retrieveContactNumber();
+                    row.firstName = contactFromPhone.firstname;
+                    row.lastName = contactFromPhone.lastname;
+                    row.address = contactFromPhone.address.addressStr;
+                    row.city = contactFromPhone.address.city;
+                    row.state = contactFromPhone.address.state;
+                    row.zip = contactFromPhone.address.zip;
+                    row.phoneNumber = contactFromPhone.phonenumber;
 
-                    contactFromPhone = new Person();
-                    if(name != null) {
-                        contactFromPhone.firstname = (name.split(" ")[0] == null) ? "" : name.split(" ")[0];
-                        if(name.split(" ").length >1)
-                            contactFromPhone.lastname = (name.split(" ")[1] == null) ? "" : name.split(" ")[1];
-                    }
-                    contactFromPhone.phonenumber = number;
-                    if(helper.retrieveContactAddress() != null)
-                    {
-                        Address addr = helper.retrieveContactAddress();
-                        contactFromPhone.address = addr;
-                    }
+                    Contact_Data.add(row);
 
+                    saveContactsList();
+
+                    StartAPIContactsLoad(Contact_Data, new ContactRowDataClicked(this));
 
                     //switch to the availability
                     AvailabilityFragment fragment = new AvailabilityFragment();
                     fragment._activity = this;
                     getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+                    return;
                 }
+
         }
     }
     //////////////////////////////////////////////////////////////////////////
@@ -315,29 +370,44 @@ public class MainActivity extends Activity {
         final MainActivity _activity = this;
         final ProgressDialog progress = new ProgressDialog(this);
         progress.setTitle("Loading");
-        progress.setMessage("Please wait while we import your new friend!");
+        progress.setMessage("Please wait while we add your new friend!");
         progress.show();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //grab the availability and the contactAddedPerson and save them to the api and the friends
+        progress.dismiss();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                //grab the availability and the contactAddedPerson and save them to the api and the friends
+//
+//                API api = API.Get();
+//                api.AddPerson(person, person.address, null, availability);
+//                api.AddFriend(GetUser(), person);
+//                // To dismiss the dialog
+//                progress.dismiss();
+//
+//                runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        selectItem(0);
+//                        //Toast.makeText(_activity, "Finished!", Toast.LENGTH_LONG);
+//                    }
+//                });
+//            }
+//        }).start();
 
-                API api = API.Get();
-                api.AddPerson(person, person.address, null, availability);
-                api.AddFriend(GetUser(), person);
-                // To dismiss the dialog
-                progress.dismiss();
+                    //switch to Friends view
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        selectItem(0);
-                        //Toast.makeText(_activity, "Finished!", Toast.LENGTH_LONG);
-                    }
-                });
-            }
-        }).start();
+        PageFragment fragment = new PageFragment();
+        Bundle args = new Bundle();
+        args.putString("Page", "Friends");
+        fragment.activity = this;
+        fragment.setArguments(args, mMenuItems);
+
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+
 
     }
     //////////////////////////////////////////////////////////////////////////
@@ -375,7 +445,13 @@ public class MainActivity extends Activity {
             writer1.write(new Gson().toJson(availability));
             writer.close();
             writer1.close();
-        } catch(Exception e) { e.printStackTrace(); }
+
+            System.err.println("Success while saving user & availability files!");
+
+        } catch(Exception e) {
+            System.err.println("Error while saving user & availability files!");
+            e.printStackTrace();
+        }
 
     }
     //////////////////////////////////////////////////////////////////////////
@@ -495,25 +571,25 @@ public class MainActivity extends Activity {
                     public void run() {
                         //grab the availability and the contactAddedPerson and save them to the api and the friends
 
-                        API api = API.Get();
-                        Person[] people = api.GetPeopleCached();
-
-                        for(Person p : people) {
-                            ContactRowData row = new ContactRowData();
-                            row.firstName = p.firstname;
-                            row.lastName = p.lastname;
-                            row.address = p.address.addressStr;
-                            row.city = p.address.city;
-                            row.state = p.address.state;
-                            row.zip = p.address.zip;
-                            row.phoneNumber = p.phonenumber;
-
-                            data.add(row);
-                        }
-                        // To dismiss the dialog
+//                        API api = API.Get();
+//                        Person[] people = api.GetPeopleCached();
+//
+//                        for(Person p : people) {
+//                            ContactRowData row = new ContactRowData();
+//                            row.firstName = p.firstname;
+//                            row.lastName = p.lastname;
+//                            row.address = p.address.addressStr;
+//                            row.city = p.address.city;
+//                            row.state = p.address.state;
+//                            row.zip = p.address.zip;
+//                            row.phoneNumber = p.phonenumber;
+//
+//                            data.add(row);
+//                        }
+//                        // To dismiss the dialog
                         progress.dismiss();
 
-                        activity.StartAPIContactsLoad(data, new ContactRowDataClicked(activity));
+                        activity.StartAPIContactsLoad(Contact_Data, new ContactRowDataClicked(activity));
                     }
                 });
 
@@ -538,37 +614,52 @@ public class MainActivity extends Activity {
                     public void run() {
                         //grab the availability and the contactAddedPerson and save them to the api and the friends
 
-                        API api = API.Get();
-                        Person person = GetUser();
-                        if(person.idperson == -1) {
-                            person.idperson = api.GetPersonID(person);
-                            Save(person, GetUserAvailability()); //prevent future loading
-                        }
-
-                        Person[] people = api.GetFriends(person);
-
-                        for(Person p : people) {
-                            ContactRowData row = new ContactRowData();
-                            row.firstName = p.firstname;
-                            row.lastName = p.lastname;
-                            row.address = p.address.addressStr;
-                            row.city = p.address.city;
-                            row.state = p.address.state;
-                            row.zip = p.address.zip;
-                            row.phoneNumber = p.phonenumber;
-
-                            data.add(row);
-                        }
+//                        API api = API.Get();
+//                        Person person = GetUser();
+//                        if(person.idperson == -1) {
+//                            person.idperson = api.GetPersonID(person);
+//                            Save(person, GetUserAvailability()); //prevent future loading
+//                        }
+//
+//                        Person[] people = api.GetFriends(person);
+//
+//                        for(Person p : people) {
+//                            ContactRowData row = new ContactRowData();
+//                            row.firstName = p.firstname;
+//                            row.lastName = p.lastname;
+//                            row.address = p.address.addressStr;
+//                            row.city = p.address.city;
+//                            row.state = p.address.state;
+//                            row.zip = p.address.zip;
+//                            row.phoneNumber = p.phonenumber;
+//
+//                            data.add(row);
+//                        }
                         // To dismiss the dialog
                         progress.dismiss();
 
-                        activity.StartAPIContactsLoad(data, new FriendOnTouchHandler());
+                        activity.StartAPIContactsLoad(Contact_Data, new FriendOnTouchHandler());
                     }
                 });
 
                 thread.start();
             }
         });
+    }
+
+
+    public void saveContactsList()
+    {
+        SharedPreferences settings = getSharedPreferences(CONTACT_PREF, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        Set<String> set = new HashSet<String>();
+
+        for( Iterator<ContactRowData> i = Contact_Data.iterator(); i.hasNext();)
+        {
+            set.add(new Gson().toJson(i.next()));
+        }
+        editor.putStringSet("Contact_Data_Set", set);
+        editor.commit();
     }
 }
 

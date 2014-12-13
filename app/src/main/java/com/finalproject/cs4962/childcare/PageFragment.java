@@ -1,5 +1,6 @@
 package com.finalproject.cs4962.childcare;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -31,16 +32,20 @@ public class PageFragment extends Fragment {
             activity.SetFriendsRowData();
             layoutID = R.layout.friends_layout;
         }
-        else if(selectedView.contains("Add Contact")) {
-
+        else if(selectedView.contains("Add Contact"))
+        {
             layoutID = R.layout.add_contact_layout;
             View inflated = inflater.inflate(layoutID, container, false);
 
             activity.LoadAddContactsListeners(inflated);
             return inflated;
         }
-        else if(selectedView.contains("Add Event")) layoutID = R.layout.add_event_view;
-        else if(selectedView.contains("Profile")) {
+        else if(selectedView.contains("Add Event"))
+        {
+            layoutID = R.layout.add_event_view;
+        }
+        else if(selectedView.contains("Profile"))
+        {
             layoutID = R.layout.profile_view;
             View inflated = inflater.inflate(layoutID, container, false);
             activity.SetProfileView(inflated);
