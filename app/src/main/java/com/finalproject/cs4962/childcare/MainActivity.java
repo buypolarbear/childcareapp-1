@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -40,8 +43,6 @@ import server.API;
 
 
 
-
-
 public class MainActivity extends Activity {
 
     ///////////////////////////////////////////////////////////////////////////
@@ -58,7 +59,7 @@ public class MainActivity extends Activity {
     public static final String CONTACT_PREF = "MyContactFile";
 
 
-    final ArrayList<ContactRowData> Contact_Data = new ArrayList<ContactRowData>();
+    public static final ArrayList<ContactRowData> Contact_Data = new ArrayList<ContactRowData>();
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -80,6 +81,23 @@ public class MainActivity extends Activity {
             StartupView();
         } else {
             InitialSetup = false;
+
+            PageFragment fragment = new PageFragment();
+            Bundle args = new Bundle();
+            args.putString("Page", "Events");
+            fragment.activity = this;
+            fragment.setArguments(args, mMenuItems);
+
+            // Insert the fragment by replacing any existing fragment
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+//            setContentView(R.layout.event_view);
+//            LayoutInflater inflater = this.getLayoutInflater();
+//            //inflating the row layout we defined earlier.
+//            inflater.inflate(R.layout.event_view, act);
+//            FragmentManager fragmentManager = getFragmentManager();
+//            fragmentManager.beginTransaction().replace(R.id.ev, fragment).commit();
+//            View inflated = inflater.inflate(R.layout.profile_view, container, false);
         }
     }
     ///////////////////////////////////////////////////////////////////////////
@@ -103,9 +121,6 @@ public class MainActivity extends Activity {
         {
             try {
                 Contact_Data.add(new Gson().fromJson(i.next(), ContactRowData.class));
-                //editor.putString("Contact_Data", new Gson().toJson(Contact_Data));
-               // Contact_Data = (ArrayList<ContactRowData>) new Gson().fromJson(settings.getString("Contact_Data", ""), ContactRowData.class);
-                // Contact_Data =  (ArrayList<ContactRowData>) ObjectSerializer.deserialize(prefs.getString(TASKS, ObjectSerializer.serialize(new ArrayList<task>())));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -192,6 +207,39 @@ public class MainActivity extends Activity {
     ///////////////////////////////////////////////////////////////////////////
     public void SetupManualContactView(View view) {
         ((Button)view.findViewById(R.id.addContactButton)).setOnClickListener(addContactListener);
+    }
+
+
+
+    //Todo: populate events
+    /**
+     *
+     */
+    public void setEventsRowData() {
+
+
+
+    }
+
+
+
+    //todo: populate spinner
+    /**
+     *
+     * @param inflated
+     */
+    public void LoadAddEventsListeners(View inflated) {
+
+//        Contact_Data.
+
+//        Spinner spinner = (Spinner) findViewById(R.id.select_contacts_spinner);
+//// Create an ArrayAdapter using the string array and a default spinner layout
+//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+//                Contact_Data.toArray(), android.R.layout.simple_spinner_item);
+//// Specify the layout to use when the list of choices appears
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//// Apply the adapter to the spinner
+//        spinner.setAdapter(adapter);
     }
 
     ///////////////////////////////////////////////////////////////////////////

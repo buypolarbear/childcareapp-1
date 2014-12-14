@@ -126,5 +126,3 @@ public class EventCardAdapter extends ArrayAdapter<EventCardRowData> {
         return convertView;
     }
 }
-
-

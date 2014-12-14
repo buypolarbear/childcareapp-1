@@ -10,10 +10,12 @@
         android:text="How would you like to add a new contact?"/>
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-    <Button
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/contactsButton"

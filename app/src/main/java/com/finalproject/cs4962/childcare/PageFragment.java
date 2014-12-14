@@ -27,10 +27,20 @@ public class PageFragment extends Fragment {
         // Inflate the layout for this fragment
         //{ "Events", "Friends", "Add Contact", "Add Event" };
         int layoutID = -1;
-        if(selectedView.contains("Events")) layoutID = R.layout.event_view;
+
+        activity.setEventsRowData();
+        layoutID = R.layout.event_view;
+
+        if(selectedView.contains("Events"))
+        {
+            activity.setEventsRowData();
+            layoutID = R.layout.event_view;
+        }
         else if(selectedView.contains("Friends")) {
             activity.SetFriendsRowData();
             layoutID = R.layout.friends_layout;
+
+
         }
         else if(selectedView.contains("Add Contact"))
         {
@@ -43,6 +53,10 @@ public class PageFragment extends Fragment {
         else if(selectedView.contains("Add Event"))
         {
             layoutID = R.layout.add_event_view;
+            View inflated = inflater.inflate(layoutID, container, false);
+
+            activity.LoadAddEventsListeners(inflated);
+            return inflated;
         }
         else if(selectedView.contains("Profile"))
         {
@@ -53,6 +67,5 @@ public class PageFragment extends Fragment {
         }
         return inflater.inflate(layoutID, container, false);
     }
-
 
 }
