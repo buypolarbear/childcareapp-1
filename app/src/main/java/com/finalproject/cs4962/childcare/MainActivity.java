@@ -684,6 +684,8 @@ public class MainActivity extends Activity {
 //                            data.add(row);
 //                        }
                         // To dismiss the dialog
+
+                        data.addAll(Contact_Data);
                         progress.dismiss();
 
                         activity.StartAPIContactsLoad(Contact_Data, new FriendOnTouchHandler());

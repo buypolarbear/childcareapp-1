@@ -5,14 +5,44 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+
 /**
  * Created by Braden on 12/9/2014.
  */
 public class FriendOnTouchHandler implements View.OnTouchListener {
+
+    Toast toast;
+    private int padding = 0;
+    private int initialx = 0;
+    private int currentx = 0;
+   // private  ViewHolder viewHolder;
+
+    MotionEvent moEv;
     @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
+    public boolean onTouch(View view, MotionEvent moEv) {
         //nothing for now i think
-       // Toast.makeText(view.getContext(), "Touched: "+ view.getParent().getParent().toString() ,Toast.LENGTH_SHORT).show();
+
+        if(toast != null)
+            toast.cancel();
+
+       // view.getParent().bringChildToFront(view);
+        if(moEv.getAction()==MotionEvent.ACTION_MOVE)
+             toast = Toast.makeText(view.getContext(), "Touched Ac. Move: "+ view.toString(),Toast.LENGTH_SHORT);
+        else if(moEv.getAction()==MotionEvent.ACTION_CANCEL) {
+
+            toast = Toast.makeText(view.getContext(), "Touched Ac. Cancel: " + view.toString(), Toast.LENGTH_SHORT);
+        }
+        else if(moEv.getAction()==MotionEvent.ACTION_UP) {
+
+            toast = Toast.makeText(view.getContext(), "Touched Ac. Up Delta X: " + (initialx-(int) moEv.getX()), Toast.LENGTH_SHORT);
+        }
+        else if(moEv.getAction()==MotionEvent.ACTION_DOWN) {
+            initialx = (int) moEv.getX();
+
+            toast = Toast.makeText(view.getContext(), "Touched Ac. Down init X: " + initialx, Toast.LENGTH_SHORT);
+        }
+
+        toast.show();
 
 //        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
 //            Intent edit=new Intent(vie.getParent(),EditActivity.class);
