@@ -36,6 +36,9 @@ public class ContactFragment extends Fragment {
         //View header = (View)getLayoutInflater().inflate(R.layout.contact_view_list_header, null);
         //view.addHeaderView(header);
         listview.setAdapter(dataArrayAdapter);
+        listview.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
+//        for(listview.)
 
         return listview;
     }

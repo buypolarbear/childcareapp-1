@@ -1,5 +1,6 @@
 package model;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -20,5 +21,7 @@ public class Person {
     public List<Child> children;
 
     public List<Event> scheduledEvents;
+
+    public URI uri;
 
 }
