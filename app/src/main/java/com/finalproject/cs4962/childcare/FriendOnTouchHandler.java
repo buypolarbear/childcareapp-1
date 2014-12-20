@@ -12,7 +12,7 @@ public class FriendOnTouchHandler implements View.OnTouchListener {
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         //nothing for now i think
-       // Toast.makeText(view.getContext(), "Touched: "+ view.getParent().getParent().toString() ,Toast.LENGTH_SHORT).show();
+        Toast.makeText(view.getContext(), "Touched: "+ view.getParent().getParent().toString() ,Toast.LENGTH_SHORT).show();
 
 //        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
 //            Intent edit=new Intent(vie.getParent(),EditActivity.class);
