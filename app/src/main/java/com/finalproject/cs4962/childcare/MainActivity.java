@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -56,9 +57,10 @@ public class MainActivity extends Activity {
     public boolean InitialSetup = true;
     File file, file1, file2;
 
+    //to save Contact_Data list
     public static final String CONTACT_PREF = "MyContactFile";
 
-
+    // Contact_Data: keeps the contacts list locally
     public static final ArrayList<ContactRowData> Contact_Data = new ArrayList<ContactRowData>();
 
 
@@ -72,7 +74,6 @@ public class MainActivity extends Activity {
 
         file = new File(getFilesDir().getAbsolutePath() + "/user.txt");
         file1 = new File(getFilesDir().getAbsolutePath() + "/availability.txt");
-        //file2 = new File(getFilesDir().getAbsolutePath() + "/friends_contacts.txt");
         //file.delete(); //UNCOMMENT TO TEST STARTUP SCREEN
 
         SetupMainView();
@@ -305,8 +306,13 @@ public class MainActivity extends Activity {
     }
     ///////////////////////////////////////////////////////////////////////////
     private final int ADD_CONTACT = 1;
-  //  private final int CREATE_CONTACT = 2;
     ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Deprecated
+     * TODO: Remove method.
+     */
+    @Deprecated
     public void LoadAddContactsListeners(View view) {
         final MainActivity _activity = this;
         // Gets the ListView from the View list of the parent activity
@@ -321,25 +327,10 @@ public class MainActivity extends Activity {
             }
         });
 
-//        ((Button)view.findViewById(R.id.customButton)).setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View view, MotionEvent motionEvent) {
-//                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-//                    StartCustomContactFragment();
-//                }
-//                return true;
-//            }
-//        });
-
         ((Button)view.findViewById(R.id.customButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-
-//                AlertDialog.Builder builder = new AlertDialog.Builder(_activity);
-//
-//                builder.setTitle("Pick one from Contacts or create a new one?");
-//                builder.create();
                 Intent intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
                 intent.putExtra(ContactsContract.Intents.EXTRA_FORCE_CREATE, true);
                 intent.putExtra("finishActivityOnSaveCompleted", true);
@@ -355,6 +346,51 @@ public class MainActivity extends Activity {
             }
         });
     }
+
+
+    /**
+     *  Add Contact Dialog
+     *
+     */
+    public void LoadAddContactsDialog() {
+        final MainActivity _activity = this;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add Contact Options:");
+        builder.setItems(new CharSequence[]
+                        {"Import Existing Contact", "Create and Import a New Contact", "Cancel"},
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        Intent importContact_intent;
+                        // The 'which' argument contains the index position
+                        // of the selected item
+                        switch (which) {
+                            case 0:
+                                importContact_intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+                                startActivityForResult(importContact_intent, ADD_CONTACT);
+                                //Toast.makeText(context, "clicked 1", Toast.LENGTH_SHORT).show();
+                                break;
+                            case 1:
+                                importContact_intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
+                                importContact_intent.putExtra(ContactsContract.Intents.EXTRA_FORCE_CREATE, true);
+                                importContact_intent.putExtra("finishActivityOnSaveCompleted", true);
+                                startActivityForResult(importContact_intent, ADD_CONTACT);
+                                //Toast.makeText(context, "clicked 2", Toast.LENGTH_SHORT).show();
+                                break;
+                            case 2:
+
+                                //Toast.makeText(context, "clicked 3", Toast.LENGTH_SHORT).show();
+                                break;
+                        }
+                    }
+                });
+        builder.create().show();
+    }
+
+
+
+
     ///////////////////////////////////////////////////////////////////////////
     Person contactFromPhone;
     ///////////////////////////////////////////////////////////////////////////
@@ -416,12 +452,15 @@ public class MainActivity extends Activity {
     //////////////////////////////////////////////////////////////////////////
     public void AvailabilitySetForImportedContact(final Availability availability, final Person person) {
         final MainActivity _activity = this;
-        final ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Loading");
-        progress.setMessage("Please wait while we add your new friend!");
-        progress.show();
+//        final ProgressDialog progress = new ProgressDialog(this);
+//        progress.setTitle("Loading");
+//        progress.setMessage("Please wait while we add your new friend!");
+//        progress.show();
+//
+//        progress.dismiss();
 
-        progress.dismiss();
+
+
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
@@ -610,9 +649,9 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 final ProgressDialog progress = new ProgressDialog(activity);
-                progress.setTitle("Loading");
-                progress.setMessage("Please wait while we grab potential new friends!");
-                progress.show();
+//                progress.setTitle("Loading");
+//                progress.setMessage("Please wait while we grab potential new friends!");
+//                progress.show();
 
                 Thread thread = new Thread(new Runnable() {
                     @Override
@@ -653,9 +692,9 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 final ProgressDialog progress = new ProgressDialog(activity);
-                progress.setTitle("Loading");
-                progress.setMessage("Please wait while we grab your friends!");
-                progress.show();
+//                progress.setTitle("Loading");
+//                progress.setMessage("Please wait while we grab your friends!");
+//                progress.show();
 
                 Thread thread = new Thread(new Runnable() {
                     @Override
@@ -688,7 +727,7 @@ public class MainActivity extends Activity {
                         data.addAll(Contact_Data);
                         progress.dismiss();
 
-                        activity.StartAPIContactsLoad(Contact_Data, new FriendOnTouchHandler());
+                        activity.StartAPIContactsLoad(Contact_Data, new FriendOnTouchHandler(activity));
                     }
                 });
 
@@ -710,6 +749,21 @@ public class MainActivity extends Activity {
         }
         editor.putStringSet("Contact_Data_Set", set);
         editor.commit();
+    }
+
+
+    public void LoadContactDetails() {
+
+
+        PageFragment fragment = new PageFragment();
+        Bundle args = new Bundle();
+        args.putString("Page", "ContactDetails");
+        fragment.activity = this;
+        fragment.setArguments(args, mMenuItems);
+
+        // Insert the fragment by replacing any existing fragment
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 }
 

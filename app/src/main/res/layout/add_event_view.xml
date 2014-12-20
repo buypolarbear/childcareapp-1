@@ -12,9 +12,11 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_vertical_margin"
         android:text="Sitter name:"
         android:id="@+id/textView"
-        android:background="#ffbbbbbb" />
+        android:background="#ffbbbbbb"
+        android:textStyle="bold"/>
 
     <EditText
         android:layout_width="match_parent"
@@ -27,9 +29,11 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_vertical_margin"
         android:text="Date:"
         android:id="@+id/textView2"
-        android:background="#ffbbbbbb" />
+        android:background="#ffbbbbbb"
+        android:textStyle="bold"/>
 
     <DatePicker
         android:layout_width="wrap_content"
@@ -39,40 +43,77 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Time:"
-        android:id="@+id/textView3"
-        android:background="#ffbbbbbb" />
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:text="Start Time:"
+        android:id="@+id/startTimeTextView"
+        android:background="#ffbbbbbb"
+        android:textStyle="bold"/>
 
     <TimePicker
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/eventTimePicker" />
+        android:id="@+id/eventStartTimePicker" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:text="End Time:"
+        android:id="@+id/endTimeTextView"
+        android:background="#ffbbbbbb"
+        android:textStyle="bold"/>
+
+    <TimePicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/eventEndTimePicker" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_vertical_margin"
         android:text="Number of kids:"
-        android:id="@+id/textView4"
-        android:background="#ffbbbbbb" />
+        android:id="@+id/numberOfKidsTextView"
+        android:background="#ffbbbbbb"
+        android:textStyle="bold"/>
 
     <NumberPicker
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/numberOfKidsPicker"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:padding="@dimen/activity_horizontal_margin"
         android:gravity="center_horizontal"
         android:orientation="horizontal" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_vertical_margin"
+        android:text="Notes:"
+        android:id="@+id/notesTextView"
+        android:background="#ffbbbbbb"
+        android:textStyle="bold"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/notesEditText" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Add Event"
+        android:textColor="#000000"
         android:id="@+id/button"
         android:layout_gravity="center_horizontal|bottom"
         android:background="#ff007d1f"
         android:gravity="center|center_vertical|center_horizontal"
         android:enabled="false"
-        android:clickable="true" />
+        android:clickable="true"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:textStyle="bold" />
 
 </LinearLayout>
     </ScrollView>
