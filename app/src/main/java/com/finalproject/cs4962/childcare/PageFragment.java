@@ -46,61 +46,21 @@ public class PageFragment extends Fragment {
             layoutID = R.layout.friends_layout;
             inflated = inflater.inflate(layoutID, container, false);
         }
-        else if(selectedView.contains("ContactDetails")) {
+        else if(selectedView.contains("Contact Details")) {
             //activity.SetFriendsRowData();
             layoutID = R.layout.contact_view;
             inflated = inflater.inflate(layoutID, container, false);
         }
         else if(selectedView.contains("Add Contact"))
         {
-//            final Context context = container.getContext();
-//            final int ADD_CONTACT = 1;
-
-//            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//            builder.setTitle("Title");
-//            builder.setItems(new CharSequence[]
-//                            {"Import Existing Contact", "Create and Import a New Contact", "Cancel"},
-//                    new DialogInterface.OnClickListener() {
-//                        public void onClick(DialogInterface dialog, int which) {
-//
-//                           Intent importContact_intent;
-//                            // The 'which' argument contains the index position
-//                            // of the selected item
-//                            switch (which) {
-//                                case 0:
-//                                    importContact_intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-//                                    startActivityForResult(importContact_intent, ADD_CONTACT);
-//                                    //Toast.makeText(context, "clicked 1", Toast.LENGTH_SHORT).show();
-//                                    break;
-//                                case 1:
-//                                    importContact_intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
-//                                    importContact_intent.putExtra(ContactsContract.Intents.EXTRA_FORCE_CREATE, true);
-//                                    importContact_intent.putExtra("finishActivityOnSaveCompleted", true);
-//                                    startActivityForResult(importContact_intent, ADD_CONTACT);
-//                                    //Toast.makeText(context, "clicked 2", Toast.LENGTH_SHORT).show();
-//                                    break;
-//                                case 2:
-//
-//                                    //Toast.makeText(context, "clicked 3", Toast.LENGTH_SHORT).show();
-//                                    break;
-//                            }
-//                        }
-//                    });
-//            builder.create().show();
-
-
-//            layoutID = R.layout.add_contact_layout;
-//            inflated = inflater.inflate(layoutID, container, false);
-
             activity.LoadAddContactsDialog();
             activity.SetFriendsRowData();
             layoutID = R.layout.friends_layout;
             inflated = inflater.inflate(layoutID, container, false);
-
-//            activity.LoadAddContactsListeners(inflated);
         }
         else if(selectedView.contains("Add Event"))
         {
+
             layoutID = R.layout.add_event_view;
             inflated = inflater.inflate(layoutID, container, false);
 
@@ -114,6 +74,8 @@ public class PageFragment extends Fragment {
         }
         else
         {
+
+            activity.setTitle("Events");
             layoutID = R.layout.event_view;;
             inflated = inflater.inflate(layoutID, container, false);
             activity.setEventsRowData();

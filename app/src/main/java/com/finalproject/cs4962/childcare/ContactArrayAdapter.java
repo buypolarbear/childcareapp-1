@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import android.net.Uri;
 import java.util.ArrayList;
 
 /**
@@ -14,9 +15,11 @@ import java.util.ArrayList;
  */
 class ContactViewHolder {
     TextView firstName, lastName, phoneNumber, address, city, state, zip;
+    Uri uri;
 }
 class ContactRowData {
     String firstName, lastName, phoneNumber, address, city, state, zip;
+    Uri uri;
 }
 
 public class ContactArrayAdapter extends ArrayAdapter<ContactRowData> {

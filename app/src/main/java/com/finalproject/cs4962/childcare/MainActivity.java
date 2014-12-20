@@ -43,13 +43,16 @@ import model.Person;
 import server.API;
 
 
-
+/**
+ *
+ */
 public class MainActivity extends Activity {
 
     ///////////////////////////////////////////////////////////////////////////
     DrawerLayout mDrawerLayout;
     ListView mDrawerList;
     String[] mMenuItems = new String[] { "Events", "Friends", "Add Contact", "Add Event", "Profile" };
+    int eventsPos=0, friendsPos=1, contactDetailsPos=2,addContactPos=3,addEventPos=4,profilePos=5;
     String mTitle;
     private ActionBarDrawerToggle mDrawerToggle;
     private AddContactButtonListener addContactListener;
@@ -86,19 +89,13 @@ public class MainActivity extends Activity {
             PageFragment fragment = new PageFragment();
             Bundle args = new Bundle();
             args.putString("Page", "Events");
+            setTitle("Events");
             fragment.activity = this;
             fragment.setArguments(args, mMenuItems);
 
             // Insert the fragment by replacing any existing fragment
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-//            setContentView(R.layout.event_view);
-//            LayoutInflater inflater = this.getLayoutInflater();
-//            //inflating the row layout we defined earlier.
-//            inflater.inflate(R.layout.event_view, act);
-//            FragmentManager fragmentManager = getFragmentManager();
-//            fragmentManager.beginTransaction().replace(R.id.ev, fragment).commit();
-//            View inflated = inflater.inflate(R.layout.profile_view, container, false);
         }
     }
     ///////////////////////////////////////////////////////////////////////////
@@ -227,9 +224,21 @@ public class MainActivity extends Activity {
     //todo: populate spinner
     /**
      *
-     * @param inflated
+     * @param view
      */
-    public void LoadAddEventsListeners(View inflated) {
+    public void LoadAddEventsListeners(View view) {
+
+        Toast.makeText(view.getContext(), "Go ahead and add The Event Yo",Toast.LENGTH_SHORT).show();
+
+
+        ((Button)view.findViewById(R.id.addEventButton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Toast.makeText(view.getContext(), "The event has been added.",Toast.LENGTH_SHORT).show();
+                selectItem(eventsPos);
+            }
+        });
 
 //        Contact_Data.
 
@@ -379,7 +388,7 @@ public class MainActivity extends Activity {
                                 //Toast.makeText(context, "clicked 2", Toast.LENGTH_SHORT).show();
                                 break;
                             case 2:
-
+                                setTitle("Friends");
                                 //Toast.makeText(context, "clicked 3", Toast.LENGTH_SHORT).show();
                                 break;
                         }
@@ -401,6 +410,7 @@ public class MainActivity extends Activity {
         switch(reqCode)
         {
             case (ADD_CONTACT):
+                setTitle("Friends");
                 if (resultCode == Activity.RESULT_OK)
                 {
                     Uri contactData = data.getData();
@@ -432,13 +442,14 @@ public class MainActivity extends Activity {
                     row.state = contactFromPhone.address.state;
                     row.zip = contactFromPhone.address.zip;
                     row.phoneNumber = contactFromPhone.phonenumber;
+                    row.uri = contactData;
 
                     Contact_Data.add(row);
 
                     saveContactsList();
 
                     StartAPIContactsLoad(Contact_Data, new ContactRowDataClicked(this));
-
+                    //setTitle("Friends");
                     //switch to the availability
                     AvailabilityFragment fragment = new AvailabilityFragment();
                     fragment._activity = this;
@@ -448,6 +459,8 @@ public class MainActivity extends Activity {
                 }
 
         }
+
+
     }
     //////////////////////////////////////////////////////////////////////////
     public void AvailabilitySetForImportedContact(final Availability availability, final Person person) {
@@ -484,15 +497,16 @@ public class MainActivity extends Activity {
 
                     //switch to Friends view
 
-        PageFragment fragment = new PageFragment();
-        Bundle args = new Bundle();
-        args.putString("Page", "Friends");
-        fragment.activity = this;
-        fragment.setArguments(args, mMenuItems);
-
-        // Insert the fragment by replacing any existing fragment
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        selectItem(friendsPos);
+//        PageFragment fragment = new PageFragment();
+//        Bundle args = new Bundle();
+//        args.putString("Page", "Friends");
+//        fragment.activity = this;
+//        fragment.setArguments(args, mMenuItems);
+//
+//        // Insert the fragment by replacing any existing fragment
+//        FragmentManager fragmentManager = getFragmentManager();
+//        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
 
 
@@ -752,12 +766,14 @@ public class MainActivity extends Activity {
     }
 
 
-    public void LoadContactDetails() {
+    public void LoadContactDetails(View view) {
+
+        //selectItem(contactDetailsPos);
 
 
         PageFragment fragment = new PageFragment();
         Bundle args = new Bundle();
-        args.putString("Page", "ContactDetails");
+        args.putString("Page", "Contact Details");
         fragment.activity = this;
         fragment.setArguments(args, mMenuItems);
 

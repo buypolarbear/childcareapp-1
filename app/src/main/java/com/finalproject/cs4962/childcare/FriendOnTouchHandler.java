@@ -34,110 +34,47 @@ public class FriendOnTouchHandler implements View.OnTouchListener {
 
 
     public  FriendOnTouchHandler(MainActivity activity) {
+
         this._activity = activity;
     }
 
+    int touchX,touchY;
 
     @Override
-    public boolean onTouch(View view, MotionEvent moEv) {
-        //nothing for now i think
-<<<<<<< HEAD
-        Toast.makeText(view.getContext(), "Touched: "+ view.getParent().getParent().toString() ,Toast.LENGTH_SHORT).show();
-=======
+    public boolean onTouch(View view, MotionEvent event) {
 
-      //  _activity = new MainActivity();
+        if(event.getAction()  == MotionEvent.ACTION_UP) {
+            Log.i(TAG, "Clicked Contact Row: " + ((ListView) view.getParent()).getPositionForView(view));
 
-        Log.i(TAG, "Touched: " +  ((ListView) view.getParent()).getPositionForView(view));
+            _activity.LoadContactDetails(view); // on click, show contact detail view
 
-        _activity.LoadContactDetails();
-//        if(toast != null)
-//            toast.cancel();
-//        toast = Toast.makeText(view.getContext(), "Touched: " +  ((ListView) view.getParent()).getPositionForView(view), Toast.LENGTH_SHORT);
-//        toast.show();
-
-
-//        view.setBackgroundColor(Color.RED);
-       // view.get
-//        view.
-       // ((ListView) view.getParent()).getItemAtPosition(view.getBottom());
-//        view.getId()
-//        ((ListView) view.getParent()).getAdapter().getItem(((ListView) view.getParent()).getSelectedItemPosition()).toString()
-//        ((ArrayAdapter<ContactRowData>) ((ListView) view.getParent()).getAdapter()).toString()
-//        ((ListView) view.getParent()).getPositionForView((View) view.getParent());
-
-//        view.invalidate();
-//        int layoutID = -1;
-//        layoutID = R.layout.profile_view;
-////        View inflated = view.inflate(layoutID, view.getParent().getParent(), false);
-//        _activity.SetProfileView(view);
-
-
-        // TODO Auto-generated method stub
-//        Intent userCreationIntent = new Intent(view.getContext(), UserCreation.class);
-//        _activity.startActivityForResult(userCreationIntent, 0);
-
-//        PageFragment fragment = new PageFragment();
-//        fragment.activity = _activity;
-//        _activity.getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
-
-//        return inflated;
-
-//        view.getRootView();
-//        _activity.LoadFriendDetails();
-//        PageFragment fragment = new PageFragment();
-//        Bundle args = new Bundle();
-//        args.putString("Page", "Events");
-//        fragment.activity = _activity;
-//        fragment.setArguments(args, _activity.mMenuItems);
+            return false; // false: no further need for same event
+        }
+        else  if(event.getAction()  == MotionEvent.ACTION_MOVE)
+        {
+            Log.i(TAG, "Event Touch Action_MOVE: "+event.getAction());
+        }
+        else
+        {
+            Log.i(TAG, "Event Touch Action: "+event.getAction());
+        }
 //
-////        // Insert the fragment by replacing any existing fragment
-//        FragmentManager fragmentManager = _activity.getFragmentManager();
-//        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-
-
-//       // view.getParent().bringChildToFront(view);
-//        if(moEv.getAction()==MotionEvent.ACTION_MOVE)
-//             toast = Toast.makeText(view.getContext(), "Touched Ac. Move: "+ view.toString(),Toast.LENGTH_SHORT);
-//        else if(moEv.getAction()==MotionEvent.ACTION_CANCEL) {
+//        if (event.getAction() == 0) {
 //
-//            toast = Toast.makeText(view.getContext(), "Touched Ac. Cancel: " + view.toString(), Toast.LENGTH_SHORT);
+//            Log.i(TAG, "Touch 0: "+event.getAction());
+//            touchX = (int) event.getX();
+//            touchY = (int) event.getY();
 //        }
-//        else if(moEv.getAction()==MotionEvent.ACTION_UP) {
+//        if(event.getAction() == 1) {
+//            if(event.getX() == touchX && event.getY()== touchY){
+//                Log.i(TAG, "Touch 1: " + ((ListView) view.getParent()).getPositionForView(view));
 //
-//            toast = Toast.makeText(view.getContext(), "Touched Ac. Up Delta X: " + (initialx-(int) moEv.getX()), Toast.LENGTH_SHORT);
-//        }
-//        else if(moEv.getAction()==MotionEvent.ACTION_DOWN) {
-//            initialx = (int) moEv.getX();
-//
-//            toast = Toast.makeText(view.getContext(), "Touched Ac. Down init X: " + initialx, Toast.LENGTH_SHORT);
-//        }
-
-
->>>>>>> newLook
-
-//        if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-//            Intent edit=new Intent(vie.getParent(),EditActivity.class);
-//            TabGroupActivity parentActivity=(TabGroupActivity)getParent();
-//            parentActivity.startChildActivity("EditActivity",edit);
-//            return true;
-//        }
-//        view.getParent().showContextMenuForChild(view);
-
-//        int x = Math.round(motionEvent.getX());
-//        int y = Math.round(motionEvent.getY());
-//        for (int i=0; i<getChildCount(); i++){
-//            LinearLayout child = (LinearLayout)row.getChildAt(i);
-//            if(x > child.getLeft() && x < child.getRight() && y > child.getTop() && y < child.getBottom()){
-//                //touch is within this child
-//                if(motionEvent.getAction() == MotionEvent.ACTION_UP){
-//                    //touch has ended
-//                }
+//                _activity.LoadContactDetails(view);
 //            }
 //        }
-
-//MainActivity.Contact_Data.get(view.get)
-        return false;
+        return true; // True: Keep watching the same event (drag, swipe, or click release)
     }
+
 
 
     public View getViewByPosition(int pos, ListView listView) {
