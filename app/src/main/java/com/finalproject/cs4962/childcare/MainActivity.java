@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
     DrawerLayout mDrawerLayout;
     ListView mDrawerList;
     String[] mMenuItems = new String[] { "Events", "Friends", "Add Contact", "Add Event", "Profile" };
-    int eventsPos=0, friendsPos=1, contactDetailsPos=2,addContactPos=2,addEventPos=3,profilePos=4;
+    int eventsPos=0, friendsPos=1, contactDetailsPos=2,addContactPos=3,addEventPos=4,profilePos=5;
     String mTitle;
     private ActionBarDrawerToggle mDrawerToggle;
     private AddContactButtonListener addContactListener;
@@ -77,10 +77,7 @@ public class MainActivity extends Activity {
 
         file = new File(getFilesDir().getAbsolutePath() + "/user.txt");
         file1 = new File(getFilesDir().getAbsolutePath() + "/availability.txt");
-//        file.delete(); //UNCOMMENT TO TEST STARTUP SCREEN
-//        SharedPreferences settings = getSharedPreferences(CONTACT_PREF, 0);
-//        settings.edit().clear();
-
+        //file.delete(); //UNCOMMENT TO TEST STARTUP SCREEN
 
         SetupMainView();
 
@@ -231,7 +228,7 @@ public class MainActivity extends Activity {
      */
     public void LoadAddEventsListeners(View view) {
 
-        //Toast.makeText(view.getContext(), "Go ahead and add The Event Yo",Toast.LENGTH_SHORT).show();
+        Toast.makeText(view.getContext(), "Go ahead and add The Event Yo",Toast.LENGTH_SHORT).show();
 
 
         ((Button)view.findViewById(R.id.addEventButton)).setOnClickListener(new View.OnClickListener() {
@@ -447,18 +444,6 @@ public class MainActivity extends Activity {
                     row.phoneNumber = contactFromPhone.phonenumber;
                     row.uri = contactData;
 
-
-                    // ImageView profile  = (ImageView)view.findViewById(R.id.contactViewImageView);
-                    //Uri my_contact_Uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactData));
-//                    InputStream photo_stream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),contactData);
-//                    BufferedInputStream buf =new BufferedInputStream(photo_stream);
-//                    Bitmap my_btmp = BitmapFactory.decodeStream(buf);
-//                   // profile.setImageBitmap(my_btmp);
-//
-//                    row.imgBit = my_btmp;
-
-                    Toast.makeText(this,"row is added: " ,Toast.LENGTH_SHORT); //+ row.firstName + " "+row.lastName,
-
                     Contact_Data.add(row);
 
                     saveContactsList();
@@ -479,7 +464,7 @@ public class MainActivity extends Activity {
     }
     //////////////////////////////////////////////////////////////////////////
     public void AvailabilitySetForImportedContact(final Availability availability, final Person person) {
-//       final MainActivity _activity = this;
+        final MainActivity _activity = this;
 //        final ProgressDialog progress = new ProgressDialog(this);
 //        progress.setTitle("Loading");
 //        progress.setMessage("Please wait while we add your new friend!");
@@ -796,25 +781,5 @@ public class MainActivity extends Activity {
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
-
-    public void contactViewSwipe(View view) {
-
-        //selectItem(contactDetailsPos);
-//        int layoutID = R.layout.contact_view_swipe;
-
-//        view.inflate(layoutID, view.getParent());
-
-//        PageFragment fragment = new PageFragment();
-//        Bundle args = new Bundle();
-//        args.putString("Page", "Contact Details");
-//        fragment.activity = this;
-//        fragment.setArguments(args, mMenuItems);
-//
-//        // Insert the fragment by replacing any existing fragment
-//        FragmentManager fragmentManager = getFragmentManager();
-//        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-    }
-
-
 }
 

@@ -1,12 +1,10 @@
 package com.finalproject.cs4962.childcare;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import android.net.Uri;
@@ -18,12 +16,10 @@ import java.util.ArrayList;
 class ContactViewHolder {
     TextView firstName, lastName, phoneNumber, address, city, state, zip;
     Uri uri;
-//    ImageView img;
 }
 class ContactRowData {
     String firstName, lastName, phoneNumber, address, city, state, zip;
     Uri uri;
-//    Bitmap imgBit;
 }
 
 public class ContactArrayAdapter extends ArrayAdapter<ContactRowData> {
@@ -63,7 +59,6 @@ public class ContactArrayAdapter extends ArrayAdapter<ContactRowData> {
         holder.city = (TextView) convertView.findViewById(R.id.contact_view_city);
         holder.state = (TextView) convertView.findViewById(R.id.contact_view_state);
         holder.zip = (TextView) convertView.findViewById(R.id.contact_view_zip);
-        //holder.img = (ImageView) convertView.findViewById(R.id.contact_view_imageView);
 
         ContactRowData data = list.get(position);
         holder.firstName.setText(data.firstName);
@@ -74,10 +69,7 @@ public class ContactArrayAdapter extends ArrayAdapter<ContactRowData> {
         holder.state.setText(data.state);
         holder.zip.setText(data.zip);
 
-//        if(data.imgBit != null)
-//            holder.img.setImageBitmap(data.imgBit);
 
-        convertView.setTag(data);
         return convertView;
     }
 }
