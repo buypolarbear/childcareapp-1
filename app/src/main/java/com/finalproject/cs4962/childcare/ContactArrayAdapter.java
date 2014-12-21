@@ -60,20 +60,20 @@ public class ContactArrayAdapter extends ArrayAdapter<ContactRowData> {
         holder.firstName = (TextView) convertView.findViewById(R.id.contact_view_firstname);
         holder.lastName = (TextView) convertView.findViewById(R.id.contact_view_lastname);
         holder.phoneNumber = (TextView) convertView.findViewById(R.id.contact_view_phonenumber);
-        holder.address = (TextView) convertView.findViewById(R.id.contact_view_address);
-        holder.city = (TextView) convertView.findViewById(R.id.contact_view_city);
-        holder.state = (TextView) convertView.findViewById(R.id.contact_view_state);
-        holder.zip = (TextView) convertView.findViewById(R.id.contact_view_zip);
+//        holder.address = (TextView) convertView.findViewById(R.id.contact_view_address);
+//        holder.city = (TextView) convertView.findViewById(R.id.contact_view_city);
+//        holder.state = (TextView) convertView.findViewById(R.id.contact_view_state);
+//        holder.zip = (TextView) convertView.findViewById(R.id.contact_view_zip);
         //holder.img = (ImageView) convertView.findViewById(R.id.contact_view_imageView);
 
         ContactRowData data = list.get(position);
         holder.firstName.setText(data.firstName);
         holder.lastName.setText(data.lastName);
         holder.phoneNumber.setText(data.phoneNumber);
-        holder.address.setText(data.address);
-        holder.city.setText(data.city);
-        holder.state.setText(data.state);
-        holder.zip.setText(data.zip);
+//        holder.address.setText(data.address);
+//        holder.city.setText(data.city);
+//        holder.state.setText(data.state);
+//        holder.zip.setText(data.zip);
 
 //       if(data.imgBit != null)
 //            holder.img.setImageBitmap(data.imgBit);

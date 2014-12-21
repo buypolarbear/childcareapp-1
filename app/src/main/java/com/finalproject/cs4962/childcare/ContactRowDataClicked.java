@@ -23,10 +23,10 @@ public class ContactRowDataClicked implements View.OnTouchListener {
             p.firstname = ((TextView)view.findViewById(R.id.contact_view_firstname)).getText().toString();
             p.lastname = ((TextView)view.findViewById(R.id.contact_view_lastname)).getText().toString();
             p.phonenumber = ((TextView)view.findViewById(R.id.contact_view_phonenumber)).getText().toString();
-            p.address.addressStr = ((TextView)view.findViewById(R.id.contact_view_address)).getText().toString();
-            p.address.city = ((TextView)view.findViewById(R.id.contact_view_city)).getText().toString();
-            p.address.state = ((TextView)view.findViewById(R.id.contact_view_state)).getText().toString();
-            p.address.zip = ((TextView)view.findViewById(R.id.contact_view_zip)).getText().toString();
+//            p.address.addressStr = ((TextView)view.findViewById(R.id.contact_view_address)).getText().toString();
+//            p.address.city = ((TextView)view.findViewById(R.id.contact_view_city)).getText().toString();
+//            p.address.state = ((TextView)view.findViewById(R.id.contact_view_state)).getText().toString();
+//            p.address.zip = ((TextView)view.findViewById(R.id.contact_view_zip)).getText().toString();
 
             activity.contactFromPhone = p;
 

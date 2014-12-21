@@ -133,6 +133,7 @@ public class FriendOnTouchHandler implements View.OnTouchListener {
 //                                    importContact_intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
                                         //startActivityForResult(importContact_intent, ADD_CONTACT);
                                         //Toast.makeText(context, "clicked 1", Toast.LENGTH_SHORT).show();
+                                        _activity.selectItem(_activity.addEventPos);
                                         break;
                                     case 1:
                                         _activity.LoadContactDetails(view);
