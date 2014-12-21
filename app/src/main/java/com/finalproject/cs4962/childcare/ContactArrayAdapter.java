@@ -17,12 +17,12 @@ import java.util.ArrayList;
  */
 class ContactViewHolder {
     TextView firstName, lastName, phoneNumber, address, city, state, zip;
-    Uri uri;
+//    Uri uri;
 //    ImageView img;
 }
 class ContactRowData {
     String firstName, lastName, phoneNumber, address, city, state, zip;
-    Uri uri;
+//    Uri uri;
 //    Bitmap imgBit;
 }
 

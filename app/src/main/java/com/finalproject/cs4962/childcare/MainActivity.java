@@ -445,7 +445,7 @@ public class MainActivity extends Activity {
                     row.state = contactFromPhone.address.state;
                     row.zip = contactFromPhone.address.zip;
                     row.phoneNumber = contactFromPhone.phonenumber;
-                    row.uri = contactData;
+//                    row.uri = contactData;
 
 
                     // ImageView profile  = (ImageView)view.findViewById(R.id.contactViewImageView);
