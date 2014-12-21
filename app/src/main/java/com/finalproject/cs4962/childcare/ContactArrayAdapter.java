@@ -26,6 +26,7 @@ class ContactRowData {
     Bitmap imgBit;
 }
 
+
 public class ContactArrayAdapter extends ArrayAdapter<ContactRowData> {
     private ArrayList<ContactRowData> list;
     private MainActivity _activity;

@@ -59,11 +59,14 @@ public class FriendOnTouchHandler implements View.OnTouchListener {
     int touchX,touchY;
 
     @Override
-    public boolean onTouch(View view, MotionEvent event) {
+    public boolean onTouch(final View view, MotionEvent event) {
+
+
+        final int viewPos = ((ListView) view.getParent()).getPositionForView(view);
 
 
         if(event.getAction()  == MotionEvent.ACTION_DOWN) {
-            Log.i(TAG, "Pressed Contact Row: " + ((ListView) view.getParent()).getPositionForView(view));
+            Log.i(TAG, "Pressed Contact Row: " + viewPos);
             touchX = (int) event.getX();
             touchY = (int) event.getY();
 
@@ -84,7 +87,7 @@ public class FriendOnTouchHandler implements View.OnTouchListener {
         }
         else if(event.getAction()  == MotionEvent.ACTION_UP) {
             if((int)event.getX() == touchX && (int)event.getY()== touchY) {
-                Log.i(TAG, "Clicked Contact Row: " + ((ListView) view.getParent()).getPositionForView(view));
+                Log.i(TAG, "Clicked Contact Row: " + viewPos);
 
                 _activity.LoadContactDetails(view); // on click, show contact detail view
                 return false; // false: no further need for same event
@@ -118,7 +121,7 @@ public class FriendOnTouchHandler implements View.OnTouchListener {
                 builder.setTitle("Select An Option for "+((ContactRowData)view.getTag()).firstName+": "+name);
                 //builder.setIcon(photo_stream);
                 builder.setItems(new CharSequence[]
-                                {"Create event with", "More about this contact", "Delete contact", "Cancel"},
+                                {"Create event with", "More about "+((ContactRowData)view.getTag()).firstName, "Delete contact", "Cancel"},
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
 
@@ -132,6 +135,7 @@ public class FriendOnTouchHandler implements View.OnTouchListener {
                                         //Toast.makeText(context, "clicked 1", Toast.LENGTH_SHORT).show();
                                         break;
                                     case 1:
+                                        _activity.LoadContactDetails(view);
 //                                    importContact_intent = new Intent(Intent.ACTION_INSERT, ContactsContract.Contacts.CONTENT_URI);
 //                                    importContact_intent.putExtra(ContactsContract.Intents.EXTRA_FORCE_CREATE, true);
 //                                    importContact_intent.putExtra("finishActivityOnSaveCompleted", true);
@@ -139,8 +143,9 @@ public class FriendOnTouchHandler implements View.OnTouchListener {
                                         //Toast.makeText(context, "clicked 2", Toast.LENGTH_SHORT).show();
                                         break;
                                     case 2:
+                                        //_activity.removeContact(viewPos);
                                         //setTitle("Friends");
-                                        //Toast.makeText(context, "clicked 3", Toast.LENGTH_SHORT).show();
+                                        confirmAction(view, viewPos);
                                         break;
                                 }
                             }
@@ -200,6 +205,34 @@ public class FriendOnTouchHandler implements View.OnTouchListener {
 //            }
 //        }
         return true; // True: Keep watching the same event (drag, swipe, or click release)
+    }
+
+
+
+    public boolean confirmAction(final View view, final int pos)
+    {
+        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+        builder.setTitle("Remove "+((ContactRowData)view.getTag()).firstName+"?");
+        builder.setMessage("Removing a contact will remove all related events!")
+                .setPositiveButton("Remove", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User clicked OK button
+                        _activity.removeContact(pos);
+                        _activity.selectItem(_activity.friendsPos);
+//                        ((ListView)view.getParent()).invalidate();
+                        Toast.makeText(view.getContext(), ((ContactRowData)view.getTag()).firstName+" was Removed", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+            // User clicked Cancel button
+
+                    }
+                 });
+
+        builder.create().show();
+
+        return false;
     }
 
 

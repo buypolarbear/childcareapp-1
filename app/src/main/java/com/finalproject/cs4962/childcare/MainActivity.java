@@ -30,6 +30,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -127,7 +128,11 @@ public class MainActivity extends Activity {
         for( Iterator<String> i = set.iterator(); i.hasNext();)
         {
             try {
-                Contact_Data.add(new Gson().fromJson(i.next(), ContactRowData.class));
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(Uri.class, new UriSerializer())
+                        .create();
+                //set.add(gson.toJson(i.next()));
+                Contact_Data.add(gson.fromJson(i.next(), ContactRowData.class));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -271,7 +276,7 @@ public class MainActivity extends Activity {
 
     ///////////////////////////////////////////////////////////////////////////
     /** Swaps fragments in the main content view */
-    private void selectItem(int position) {
+    public void selectItem(int position) {
         // Create a new fragment and specify the planet to show based on position
         PageFragment fragment = new PageFragment();
         Bundle args = new Bundle();
@@ -451,7 +456,7 @@ public class MainActivity extends Activity {
                     row.state = contactFromPhone.address.state;
                     row.zip = contactFromPhone.address.zip;
                     row.phoneNumber = contactFromPhone.phonenumber;
-                    //row.uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactData));//contactData;
+                   // row.uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactData));//contactData;
 
 
 //                    ImageView profile  = (ImageView)this.findViewById(R.id.contact_view_imageView);
@@ -780,7 +785,13 @@ public class MainActivity extends Activity {
 
         for( Iterator<ContactRowData> i = Contact_Data.iterator(); i.hasNext();)
         {
-            set.add(new Gson().toJson(i.next()));
+
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Uri.class, new UriSerializer())
+                    .create();
+            set.add(gson.toJson(i.next()));
+
+            //set.add(new Gson().toJson(i.next()));
         }
         editor.putStringSet("Contact_Data_Set", set);
         editor.commit();
@@ -821,6 +832,18 @@ public class MainActivity extends Activity {
 //        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 
+
+    public void removeContact(ContactRowData row)
+    {
+        Contact_Data.remove(row);
+        saveContactsList();
+    }
+
+    public void removeContact(int row)
+    {
+        Contact_Data.remove(row);
+        saveContactsList();
+    }
 
 }
 

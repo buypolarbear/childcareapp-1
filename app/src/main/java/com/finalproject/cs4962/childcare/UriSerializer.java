@@ -13,6 +13,11 @@ import java.lang.reflect.Type;
  * Created by akdPro on 12/20/14.
  */
 public class UriSerializer implements JsonSerializer<Uri> {
+
+    public UriSerializer(){
+
+    }
+
     public JsonElement serialize(Uri src, Type typeOfSrc, JsonSerializationContext context) {
         return new JsonPrimitive(src.toString());
     }
