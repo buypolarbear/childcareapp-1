@@ -17,13 +17,13 @@ import java.util.ArrayList;
  */
 class ContactViewHolder {
     TextView firstName, lastName, phoneNumber, address, city, state, zip;
-//    Uri uri;
-//    ImageView img;
+    Uri uri;
+    ImageView img;
 }
 class ContactRowData {
     String firstName, lastName, phoneNumber, address, city, state, zip;
-//    Uri uri;
-//    Bitmap imgBit;
+    Uri uri;
+    Bitmap imgBit;
 }
 
 public class ContactArrayAdapter extends ArrayAdapter<ContactRowData> {
@@ -74,7 +74,7 @@ public class ContactArrayAdapter extends ArrayAdapter<ContactRowData> {
         holder.state.setText(data.state);
         holder.zip.setText(data.zip);
 
-//        if(data.imgBit != null)
+//       if(data.imgBit != null)
 //            holder.img.setImageBitmap(data.imgBit);
 
         convertView.setTag(data);

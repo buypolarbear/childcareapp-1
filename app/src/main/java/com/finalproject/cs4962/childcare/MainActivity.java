@@ -9,6 +9,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -22,16 +24,20 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -445,16 +451,16 @@ public class MainActivity extends Activity {
                     row.state = contactFromPhone.address.state;
                     row.zip = contactFromPhone.address.zip;
                     row.phoneNumber = contactFromPhone.phonenumber;
-//                    row.uri = contactData;
+                    //row.uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactData));//contactData;
 
 
-                    // ImageView profile  = (ImageView)view.findViewById(R.id.contactViewImageView);
-                    //Uri my_contact_Uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactData));
+//                    ImageView profile  = (ImageView)this.findViewById(R.id.contact_view_imageView);
+//                    Uri my_contact_Uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, String.valueOf(contactData));
 //                    InputStream photo_stream = ContactsContract.Contacts.openContactPhotoInputStream(getContentResolver(),contactData);
 //                    BufferedInputStream buf =new BufferedInputStream(photo_stream);
 //                    Bitmap my_btmp = BitmapFactory.decodeStream(buf);
-//                   // profile.setImageBitmap(my_btmp);
-//
+                   // profile.setImageBitmap(my_btmp);
+
 //                    row.imgBit = my_btmp;
 
                     Toast.makeText(this,"row is added: " ,Toast.LENGTH_SHORT); //+ row.firstName + " "+row.lastName,
