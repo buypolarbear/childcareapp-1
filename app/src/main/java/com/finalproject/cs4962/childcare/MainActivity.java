@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
 
     // Contact_Data: keeps the contacts list locally
     public static final ArrayList<ContactRowData> Contact_Data = new ArrayList<ContactRowData>();
-
+    public static final ArrayList<EventCardRowData> Event_Data = new ArrayList<EventCardRowData>();
 
     ///////////////////////////////////////////////////////////////////////////
     @Override
@@ -92,6 +92,7 @@ public class MainActivity extends Activity {
         SetupMainView();
 
         if(!file.exists()) {
+            StartupView();
             StartupView();
         } else {
             InitialSetup = false;
@@ -137,6 +138,24 @@ public class MainActivity extends Activity {
                 e.printStackTrace();
             }
         }
+
+        set.clear();
+        set = settings.getStringSet("Event_Data_Set",new HashSet<String>());
+
+        Event_Data.clear();
+
+        for( Iterator<String> i = set.iterator(); i.hasNext();)
+        {
+            try {
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(Uri.class, new UriSerializer())
+                        .create();
+                //set.add(gson.toJson(i.next()));
+                Event_Data.add(gson.fromJson(i.next(), EventCardRowData.class));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -144,6 +163,7 @@ public class MainActivity extends Activity {
         super.onPause();
 
         saveContactsList();
+        saveEventsList();
 
         return;
     }
@@ -214,7 +234,7 @@ public class MainActivity extends Activity {
     ///////////////////////////////////////////////////////////////////////////
     public void LoadDetailedEventView(View view) {
         //TODO;
-        //setContentView(R.layout.detailed_event_view);
+//        setContentView(R.layout.detailed_event_view);
     }
     ///////////////////////////////////////////////////////////////////////////
     public void SetupManualContactView(View view) {
@@ -229,8 +249,12 @@ public class MainActivity extends Activity {
      */
     public void setEventsRowData() {
 
-
-
+//        EventCardRowData e = new EventCardRowData();
+//        e.sittername = "lol";
+//        e.endTime = "99/99/99";
+//
+//        Event_Data.add(e);
+        this.StartEventsLoad(Event_Data, new EventOnTouchHandler(this));
     }
 
 
@@ -243,27 +267,27 @@ public class MainActivity extends Activity {
     public void LoadAddEventsListeners(View view) {
 
         //Toast.makeText(view.getContext(), "Go ahead and add The Event Yo",Toast.LENGTH_SHORT).show();
-
+        final MainActivity _activity = this;
 
         ((Button)view.findViewById(R.id.addEventButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
+                EventCardRowData e = new EventCardRowData();
+                e.sittername = "lol";
+                e.endTime = "99/99/99";
+
+                Event_Data.add(e);
+                saveEventsList();
+                _activity.StartEventsLoad(Event_Data, new EventCardClicked(_activity));
+
                 Toast.makeText(view.getContext(), "The event has been added.",Toast.LENGTH_SHORT).show();
-                selectItem(eventsPos);
+                //selectItem(eventsPos);
             }
         });
 
 //        Contact_Data.
 
-//        Spinner spinner = (Spinner) findViewById(R.id.select_contacts_spinner);
-//// Create an ArrayAdapter using the string array and a default spinner layout
-//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-//                Contact_Data.toArray(), android.R.layout.simple_spinner_item);
-//// Specify the layout to use when the list of choices appears
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//// Apply the adapter to the spinner
-//        spinner.setAdapter(adapter);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -375,7 +399,7 @@ public class MainActivity extends Activity {
      *  Add Contact Dialog
      *
      */
-    public void LoadAddContactsDialog() {
+    public void fireContactsDialog() {
         final MainActivity _activity = this;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -408,6 +432,19 @@ public class MainActivity extends Activity {
                         }
                     }
                 });
+
+//        try {
+            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+
+                }
+            });
+//        }catch (Exception e)
+//        {
+//
+//        }
+
         builder.create().show();
     }
 
@@ -645,7 +682,7 @@ public class MainActivity extends Activity {
 
                 activity.Save(addedPerson, activity.GetUserAvailability());
 
-                Toast.makeText(activity, "User information saved!", Toast.LENGTH_LONG).show();
+                Toast.makeText(activity, "User information saved!", Toast.LENGTH_SHORT).show();
             }
         });
         ((Button)view.findViewById(R.id.profile_cancel)).setOnClickListener(new View.OnClickListener() {
@@ -798,6 +835,27 @@ public class MainActivity extends Activity {
     }
 
 
+    public void saveEventsList()
+    {
+        SharedPreferences settings = getSharedPreferences(CONTACT_PREF, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        Set<String> set = new HashSet<String>();
+
+        for( Iterator<EventCardRowData> i = Event_Data.iterator(); i.hasNext();)
+        {
+
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Uri.class, new UriSerializer())
+                    .create();
+            set.add(gson.toJson(i.next()));
+
+            //set.add(new Gson().toJson(i.next()));
+        }
+        editor.putStringSet("Event_Data_Set", set);
+        editor.commit();
+    }
+
+
     public void LoadContactDetails(View view) {
 
         //selectItem(contactDetailsPos);
@@ -833,6 +891,20 @@ public class MainActivity extends Activity {
     }
 
 
+
+    public void StartEventsLoad(ArrayList<EventCardRowData> data, View.OnTouchListener listener) {
+
+        EventFragment fragment = new EventFragment();
+        fragment.activity = this;
+        fragment.data = data;
+        fragment.handler = listener;
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.content_frame, fragment)
+                .commit();
+    }
+
+
     public void removeContact(ContactRowData row)
     {
         Contact_Data.remove(row);
@@ -843,6 +915,12 @@ public class MainActivity extends Activity {
     {
         Contact_Data.remove(row);
         saveContactsList();
+    }
+
+    public void removeEvent(int row)
+    {
+        Event_Data.remove(row);
+        saveEventsList();
     }
 
 }

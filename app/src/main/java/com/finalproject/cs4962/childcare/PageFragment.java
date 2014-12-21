@@ -53,7 +53,7 @@ public class PageFragment extends Fragment {
         }
         else if(selectedView.contains("Add Contact"))
         {
-            activity.LoadAddContactsDialog();
+            activity.fireContactsDialog();
             activity.SetFriendsRowData();
             layoutID = R.layout.friends_layout;
             inflated = inflater.inflate(layoutID, container, false);

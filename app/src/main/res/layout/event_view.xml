@@ -21,7 +21,7 @@
             android:id="@+id/sitterName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sitter Name" />
+            android:hint="Sitter Name" />
 
         </LinearLayout>
 
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:paddingLeft="30px"
             android:paddingRight="30px"
-            android:text="Date" />
+            android:hint="Date" />
 
         <TextView
             android:id="@+id/parentName"
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:paddingLeft="30px"
             android:paddingRight="30px"
-            android:text="Parent name" />
+            android:hint="Parent name" />
 
         <TextView
             android:id="@+id/numKids"
@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:paddingLeft="30px"
             android:paddingRight="30px"
-            android:text="Number of kids" />
+            android:hint="Number of kids" />
 
     </LinearLayout>
 
